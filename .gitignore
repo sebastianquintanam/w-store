@@ -1,0 +1,20 @@
+# === Node (ambos paquetes) ===
+**/node_modules/
+**/dist/
+**/coverage/
+
+# === Env files ===
+**/.env
+**/.env.local
+**/.env.*.local
+
+# === Prisma (si usaras sqlite en algún momento)
+**/prisma/dev.db
+**/prisma/*.sqlite
+
+# === OS / IDE ===
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log
