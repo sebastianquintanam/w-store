@@ -1,5 +1,5 @@
 // backend/src/transactions/transactions.service.ts
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Inject, forwardRef } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { WompiService } from '../wompi/wompi.service';
@@ -10,7 +10,7 @@ type FinalStatus = 'APPROVED' | 'DECLINED' | 'ERROR';
 export class TransactionsService {
     constructor(
         private prisma: PrismaService,
-        private wompi: WompiService,
+        @Inject(forwardRef(() => WompiService)) private wompi: WompiService,
     ) { }
 
     private readonly BASE_FEE = 1000;

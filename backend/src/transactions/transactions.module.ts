@@ -1,13 +1,13 @@
-import { Module } from '@nestjs/common';
-import { TransactionsService } from './transactions.service';
+import { Module, forwardRef } from '@nestjs/common';
 import { TransactionsController } from './transactions.controller';
+import { TransactionsService } from './transactions.service';
 import { PrismaService } from '../prisma.service';
 import { WompiModule } from '../wompi/wompi.module';
-import { ProductsModule } from '../products/products.module';
 
 @Module({
+    imports: [forwardRef(() => WompiModule)],      // para romper el ciclo
     controllers: [TransactionsController],
     providers: [TransactionsService, PrismaService],
-    imports: [WompiModule, ProductsModule],
+    exports: [TransactionsService],                // lo usa WompiController
 })
 export class TransactionsModule { }
