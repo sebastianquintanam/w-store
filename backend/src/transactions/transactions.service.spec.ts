@@ -1,12 +1,12 @@
-import { mockDeep, DeepMock } from 'jest-mock-extended';
+import { mockDeep, DeepMockProxy } from 'jest-mock-extended';
 import { PrismaService } from '../prisma.service';
 import { TransactionsService } from './transactions.service';
 import { WompiService } from '../wompi/wompi.service';
 
 describe('TransactionsService', () => {
     let svc: TransactionsService;
-    let prisma: DeepMock<PrismaService>;
-    let wompi: DeepMock<WompiService>;
+    let prisma: DeepMockProxy<PrismaService>;
+    let wompi: DeepMockProxy<WompiService>;
 
     beforeEach(() => {
         prisma = mockDeep<PrismaService>();
