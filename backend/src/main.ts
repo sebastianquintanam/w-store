@@ -23,6 +23,14 @@ async function bootstrap() {
     }),
   );
 
+  // ✅ CORS para Vite dev server
+  app.enableCors({
+    origin: 'http://localhost:5173',   // o ['http://localhost:5173']
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    allowedHeaders: 'Content-Type,Authorization,Integrity-Signature',
+    credentials: false, // cámbialo a true si vas a usar cookies
+  });
+  
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -31,8 +39,8 @@ async function bootstrap() {
     }),
   );
 
-  await app.listen(3000);
-  console.log('🚀 Backend corriendo en http://localhost:3000');
+  await app.listen(3001);
+  console.log('🚀 Backend corriendo en http://localhost:3001');
 }
 
 bootstrap();
