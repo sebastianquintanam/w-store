@@ -1,4 +1,3 @@
-// backend/src/wompi/wompi.controller.ts
 import { Controller, Headers, HttpCode, Post, Req, Inject, forwardRef } from '@nestjs/common';
 import { type Request } from 'express';
 import * as crypto from 'crypto';

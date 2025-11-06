@@ -1,4 +1,3 @@
-// backend/src/transactions/transactions.service.ts
 import { Injectable, NotFoundException, BadRequestException, Inject, forwardRef } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
@@ -65,8 +64,8 @@ export class TransactionsService {
                     currency: 'COP',
                     customer_email: customer.email,
                     // Usamos el id interno como referencia
-                    reference: trx.id,
-                    // En un flujo real, aquí se incluye el método de pago tokenizado (sandbox)
+                    reference: `trx_${trx.id}`,
+                    // (el método de pago irá luego cuando integremos Wompi real)
                 };
 
                 const wompiRes = await this.wompi.createTransaction(wompiPayload);
