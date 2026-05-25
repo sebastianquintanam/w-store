@@ -113,13 +113,27 @@ export class TransactionsService {
                     where: { id: updated.productId },
                     data: { stock: { decrement: 1 } },
                 });
+                const { address } = await tx.customer.findUniqueOrThrow({
+                    where: { id: updated.customerId },
+                    select: { address: true },
+                });
+                const delivery = await tx.delivery.create({
+                    data: {
+                        transactionId: id,
+                        customerId: updated.customerId,
+                        address,
+                        status: 'PENDING_SHIPMENT',
+                    },
+                });
+                return {
+                    message: 'Transacción aprobada y stock actualizado',
+                    transaction: updated,
+                    delivery,
+                };
             }
 
             return {
-                message:
-                    status === 'APPROVED'
-                        ? 'Transacción aprobada y stock actualizado'
-                        : `Transacción finalizada con estado ${status}`,
+                message: `Transacción finalizada con estado ${status}`,
                 transaction: updated,
             };
         });
