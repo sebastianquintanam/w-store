@@ -32,19 +32,21 @@ export async function getTransaction(id: string): Promise<Tx> {
     return r.json();
 }
 
-export async function createTransaction(productId: string): Promise<{ message: string; transaction: Tx }> {
+export type CreateTransactionInput = {
+    productId: string;
+    deliveryCents: number;
+    customer: {
+        fullName: string;
+        email: string;
+        address: string;
+    };
+};
+
+export async function createTransaction(input: CreateTransactionInput): Promise<{ message: string; transaction: Tx }> {
     const r = await fetch(`${API}/transactions`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            productId,
-            deliveryCents: 0,
-            customer: {
-                fullName: 'Demo User',
-                email: 'demo@example.com',
-                address: 'Calle Falsa 123',
-            },
-        }),
+        body: JSON.stringify(input),
     });
     if (!r.ok) {
         const t = await r.text();
