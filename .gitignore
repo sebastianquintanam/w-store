@@ -13,7 +13,8 @@ docs/private/
 # === Prisma ===
 prisma/dev.db
 prisma/*.sqlite
-prisma/migrations/
+# prisma/migrations/ — eliminado: el patrón no alcanzaba a backend/prisma/migrations/
+# y las migraciones SÍ deben estar en git para reproducibilidad.
 generated/prisma/
 
 # === OS / IDE ===
