@@ -1,7 +1,7 @@
 # Audit Report — W-Store
 
 **Fecha de auditoría inicial:** 2026-05-24  
-**Última actualización:** 2026-05-25 — `products.service.spec.ts` agregado (3 tests). Total: 6 suites, 20 tests passing. Cobertura global aún por debajo del 80%.  
+**Última actualización:** 2026-05-25 — `wompi.controller.spec.ts` expandido de 1 a 7 tests. Total: 7 suites, 26 tests passing. Cobertura global pendiente de confirmar contra objetivo >80%.  
 **Auditor:** Claude Sonnet 4.6 (asistido por Sebastian Quintana)  
 **Estado del proyecto:** En reparación activa. Ver `docs/ROADMAP.md` para progreso.
 
@@ -161,10 +161,10 @@ Migración `20260525014707_add_delivery` aplicada. `Delivery` se crea en `finali
 ### P5 — Cobertura de tests insuficiente (en progreso)
 - `transactions.service.spec.ts`: 10 tests. Cubre: PENDING, producto no existe, stock 0, APPROVED crea Delivery, DECLINED sin Delivery, ERROR sin Delivery, doble finalización, findOne (3 casos).
 - `products.service.spec.ts`: 3 tests. Cubre: findAll (select + orderBy), findOne (existe), findOne (NotFoundException). ✓ 2026-05-25
-- `wompi.controller.spec.ts`: 1 test (sin cambios).
+- `wompi.controller.spec.ts`: 7 tests. Cubre: APPROVED, DECLINED, VOIDED→ERROR, referencia sin `trx_`, firma ausente, firma inválida, firma válida (HMAC correcto). ✓ 2026-05-25
 - `products.controller.spec.ts`: 3 tests. `deliveries.controller.spec.ts`: 2 tests.
-- **Total backend: 6 suites, 20 tests passing.** Cobertura global aún por debajo del 80% requerido.
-- Pendiente: casos adicionales de `wompi.controller.spec.ts`, `wompi.service.spec.ts`.
+- **Total backend: 7 suites, 26 tests passing.** Cobertura global pendiente de confirmar contra objetivo >80%.
+- Pendiente: `wompi.service.spec.ts` si cobertura no alcanza el 80%.
 
 ### ~~P6 — `.gitignore` de backend incompleto~~ RESUELTO ✓ 2026-05-25
 `backend/.gitignore` reforzado: agregadas líneas `.env.*` y `!.env.example`. Cubre variantes `.env.local`, `.env.staging`, `.env.production`. Historial git auditado — ningún archivo `.env` real fue commiteado en ningún momento.
