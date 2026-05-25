@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import ProductListPage from './pages/ProductListPage';
 import CheckoutCardPage from './pages/CheckoutCardPage';
+import CheckoutSummaryPage from './pages/CheckoutSummaryPage';
 
 function CheckoutPlaceholder({ step }: { step: string }) {
   return (
@@ -15,7 +16,7 @@ export default function App() {
     <Routes>
       <Route path="/" element={<ProductListPage />} />
       <Route path="/checkout/card" element={<CheckoutCardPage />} />
-      <Route path="/checkout/summary" element={<CheckoutPlaceholder step="Resumen" />} />
+      <Route path="/checkout/summary" element={<CheckoutSummaryPage />} />
       <Route path="/checkout/processing" element={<CheckoutPlaceholder step="Procesando" />} />
       <Route path="/checkout/result" element={<CheckoutPlaceholder step="Resultado" />} />
       <Route path="*" element={<Navigate to="/" replace />} />
