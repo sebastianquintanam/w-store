@@ -1,7 +1,7 @@
 # Audit Report — W-Store
 
 **Fecha de auditoría inicial:** 2026-05-24  
-**Última actualización:** 2026-05-25 — Fase 2 parcial: endpoints de backend completos, Helmet y rate limiting implementados y validados.  
+**Última actualización:** 2026-05-25 — Fase 1 cerrada: colección Postman verificada en :3001, historial git limpio (sin .env expuesto), backend/.gitignore reforzado con .env.* y !.env.example.  
 **Auditor:** Claude Sonnet 4.6 (asistido por Sebastian Quintana)  
 **Estado del proyecto:** En reparación activa. Ver `docs/ROADMAP.md` para progreso.
 
@@ -164,8 +164,8 @@ Migración `20260525014707_add_delivery` aplicada. `Delivery` se crea en `finali
 - **Total backend: 10 tests passing.** Cobertura global aún por debajo del 80% requerido.
 - Pendiente: `products.service.spec.ts`, casos adicionales de `wompi.controller.spec.ts`.
 
-### P6 — Migraciones en `.gitignore`
-`prisma/migrations/` está excluido del repo raíz. Un clone fresco no puede reproducir el schema sin ejecutar `prisma migrate dev` desde cero, lo que puede divergir del estado de producción.
+### ~~P6 — `.gitignore` de backend incompleto~~ RESUELTO ✓ 2026-05-25
+`backend/.gitignore` reforzado: agregadas líneas `.env.*` y `!.env.example`. Cubre variantes `.env.local`, `.env.staging`, `.env.production`. Historial git auditado — ningún archivo `.env` real fue commiteado en ningún momento.
 
 ### P7 — README de backend es boilerplate de NestJS
 No documenta la arquitectura del proyecto, endpoints, modelo de datos ni instrucciones de setup.
@@ -176,7 +176,7 @@ No documenta la arquitectura del proyecto, endpoints, modelo de datos ni instruc
 
 | Riesgo | Severidad | Detalle |
 |---|---|---|
-| Archivos `.env` en disco con posibles secretos | ALTO | `backend/.env` y `frontend/.env` existen. Verificar con `git log --all --full-history -- backend/.env` si fueron commiteados. |
+| ~~Archivos `.env` en disco con posibles secretos~~ | ~~ALTO~~ | RESUELTO ✓ 2026-05-25 — Historial git auditado: ningún `.env` real commiteado. `backend/.gitignore` reforzado con `.env.*` y `!.env.example`. |
 | Webhook sin autenticación en modo por defecto | ALTO | `VERIFY_WOMPI_SIGNATURE=false` por defecto. Cualquiera puede llamar `/wompi/webhook` y finalizar transacciones. |
 | ~~Sin headers de seguridad~~ | ~~MEDIO~~ | RESUELTO ✓ 2026-05-25 — `helmet@8.2.0` en `main.ts`. Activa `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, CSP y más. |
 | ~~Sin rate limiting~~ | ~~MEDIO~~ | RESUELTO ✓ 2026-05-25 — `@nestjs/throttler@6.5.0` global: 60 req/IP/min, retorna `429` con headers `X-RateLimit-*`. |

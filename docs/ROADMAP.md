@@ -1,7 +1,7 @@
 # Roadmap — W-Store
 
 **Fecha de inicio:** 2026-05-24  
-**Última actualización:** 2026-05-25 (5)  
+**Última actualización:** 2026-05-25 (6)  
 **Estrategia:** Reparar el proyecto existente (ver `docs/DECISIONS.md`).  
 **Orden:** Las fases son secuenciales. No comenzar la siguiente hasta completar los criterios de aceptación de la anterior.
 
@@ -14,13 +14,13 @@
 ### Tareas
 
 - [x] Sacar `prisma/migrations/` del `.gitignore` — patrón era no-op; comentado con explicación. ✓ 2026-05-24
-- [ ] Corregir el port en la colección Postman de `:3000` a `:3001`.
-- [ ] Verificar con `git log --all --full-history -- backend/.env` si las credenciales fueron commiteadas; si sí, rotar keys de Wompi sandbox.
+- [x] Corregir el port en la colección Postman de `:3000` a `:3001`. ✓ 2026-05-25 — Verificado con grep: la colección ya apuntaba a `:3001` en todos sus requests. No se requirió ningún cambio.
+- [x] Verificar con `git log --all --full-history -- backend/.env` si las credenciales fueron commiteadas; si sí, rotar keys de Wompi sandbox. ✓ 2026-05-25 — Historial limpio. Los 3 commits que aparecieron en búsqueda amplia solo tocaron `backend/.env.example`. Los archivos `.env` reales nunca fueron commiteados. No se requiere rotación de keys.
 - [x] Agregar `Delivery` al schema Prisma con relaciones a `Transaction` y `Customer`. ✓ 2026-05-24
 - [x] Crear y aplicar migración `20260525014707_add_delivery`. `prisma validate` y `pnpm build` pasaron. ✓ 2026-05-25
 - [x] Agregar `helmet@8.2.0` — `app.use(helmet())` en `main.ts` después de `enableCors()`. Headers: `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, CSP. ✓ 2026-05-25
 - [x] Agregar `@nestjs/throttler@6.5.0` — `ThrottlerModule.forRoot([{ ttl: 60_000, limit: 60 }])` + `APP_GUARD` global. Responde `429` al exceder 60 req/min. ✓ 2026-05-25
-- [ ] Actualizar `backend/.gitignore` para asegurar que `.env` esté excluido correctamente a nivel de carpeta.
+- [x] Actualizar `backend/.gitignore` para asegurar que `.env` esté excluido correctamente a nivel de carpeta. ✓ 2026-05-25 — Agregadas líneas `.env.*` y `!.env.example` después de `.env` existente. Ahora cubre variantes como `.env.local`, `.env.staging`, `.env.production`.
 
 ### Criterio de aceptación
 
