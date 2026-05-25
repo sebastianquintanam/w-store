@@ -1,7 +1,7 @@
 # Roadmap — W-Store
 
 **Fecha de inicio:** 2026-05-24  
-**Última actualización:** 2026-05-25  
+**Última actualización:** 2026-05-25 (2)  
 **Estrategia:** Reparar el proyecto existente (ver `docs/DECISIONS.md`).  
 **Orden:** Las fases son secuenciales. No comenzar la siguiente hasta completar los criterios de aceptación de la anterior.
 
@@ -46,7 +46,7 @@
 **Delivery:**
 - [ ] Extraer lógica de Delivery a un repositorio o servicio dedicado (actualmente inline en `TransactionsService`).
 - [x] Al aprobar: crear `Delivery` con `transactionId`, `customerId`, `address`, `status: PENDING_SHIPMENT` dentro del `$transaction` atómico. ✓ 2026-05-25 — validado con smoke test manual (stock bajó, delivery creado, doble APPROVED idempotente).
-- [ ] `GET /transactions/:id` no incluye `delivery` relacionado — añadir `include: { delivery: true }` en `findOne()`.
+- [x] `GET /transactions/:id` ahora incluye `product` (select), `customer` (select) y `delivery` (completo, null si no aprobada). 13 tests passing. ✓ 2026-05-25
 - [ ] Exponer `GET /deliveries/:transactionId` para consulta directa desde el frontend.
 
 **WompiService:**
@@ -57,7 +57,7 @@
 
 **Tests backend (objetivo > 80% cobertura):**
 - [ ] `products.service.spec.ts`: findAll, producto sin stock.
-- [x] `transactions.service.spec.ts`: 7 tests — PENDING, producto no existe, stock 0, APPROVED crea Delivery, DECLINED sin Delivery, ERROR sin Delivery, doble finalización idempotente. ✓ 2026-05-25 — 10 tests passing en total.
+- [x] `transactions.service.spec.ts`: 10 tests — create (3), finalize (4), findOne (3). ✓ 2026-05-25 — 13 tests passing en total.
 - [ ] `wompi.controller.spec.ts`: webhook APPROVED, DECLINED, firma inválida con VERIFY=true, referencia sin prefijo `trx_`.
 - [ ] Cobertura global > 80% aún pendiente.
 

@@ -261,4 +261,29 @@ curl -s http://localhost:3001/products | jq '.[0].stock'
 - Paso 3: `delivery.status = "PENDING_SHIPMENT"` presente en respuesta.
 - Paso 4: `message = "Ya finalizada"`, sin delivery en respuesta.
 - Paso 5: stock = valor inicial − 1.
+
+```bash
+# 6. Verificar GET /transactions/:id con relaciones anidadas (validado 2026-05-25)
+curl -s http://localhost:3001/transactions/$TRX_ID | jq '{status:.status, product:.product.name, customer:.customer.email, delivery:.delivery.status}'
+```
+
+Resultado esperado (APPROVED):
+```json
+{
+  "status":   "APPROVED",
+  "product":  "Audífonos Bluetooth",
+  "customer": "test@test.com",
+  "delivery": "PENDING_SHIPMENT"
+}
+```
+
+Resultado esperado (DECLINED):
+```json
+{
+  "status":   "DECLINED",
+  "product":  "Audífonos Bluetooth",
+  "customer": "test@test.com",
+  "delivery": null
+}
+```
 ```
