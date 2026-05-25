@@ -1,8 +1,9 @@
 # Audit Report — W-Store
 
-**Fecha:** 2026-05-24  
+**Fecha de auditoría inicial:** 2026-05-24  
+**Última actualización:** 2026-05-25 — Fase 2 parcial: Delivery al aprobar implementado y validado con smoke test.  
 **Auditor:** Claude Sonnet 4.6 (asistido por Sebastian Quintana)  
-**Estado del proyecto:** Inactivo desde agosto 2025. Sin tocar código funcional al momento de esta auditoría.
+**Estado del proyecto:** En reparación activa. Ver `docs/ROADMAP.md` para progreso.
 
 ---
 
@@ -86,6 +87,9 @@ El usuario nunca ingresa información real. No hay formulario de tarjeta ni de e
 | Seed con 3 productos | `prisma/seed.ts` |
 | `.env.example` sin secretos | `backend/.env.example` |
 | `.gitignore` cubre `.env` y `docs/private/` | `.gitignore` raíz |
+| Modelo `Delivery` en BD con relaciones a `Transaction` y `Customer` | `prisma/schema.prisma` + migración `20260525014707_add_delivery` |
+| Crear `Delivery` (`PENDING_SHIPMENT`) al aprobar, dentro de la misma DB transaction atómica | `transactions.service.ts:116-132` |
+| Guard de idempotencia: doble APPROVED → "Ya finalizada" sin nuevo decremento ni Delivery | `transactions.service.ts:102-104` |
 
 ---
 
@@ -101,10 +105,8 @@ El usuario nunca ingresa información real. No hay formulario de tarjeta ni de e
 | **Formulario de entrega real** | Los datos del cliente están hardcodeados en `api.ts`. |
 | **Pantalla de resumen** | Debe mostrar producto + base fee + delivery fee + total. No existe. |
 | **Pantalla de resultado final** | Debe mostrar estado y redirigir al producto con stock actualizado. No existe. |
-| **Modelo `Delivery` en schema** | No hay tabla de entregas en `schema.prisma`. |
-| **Crear Delivery al aprobar** | El `finalize()` solo descuenta stock; no crea ninguna entrega. |
 | **Tests de frontend** | No existe ningún archivo `.spec` en `frontend/src/`. |
-| **Cobertura > 80%** | Backend tiene 2 spec files con 1 assertion cada uno. Cobertura real < 5%. |
+| **Cobertura > 80%** | Backend mejoró a 10 tests passing (7 en `transactions.service`, 1 en `wompi.controller`, 2 anteriores). Cobertura global aún por debajo del 80% requerido. |
 
 ### Altos (degradan la calidad técnica)
 
@@ -148,13 +150,16 @@ El flujo completo de checkout nunca captura datos reales del usuario.
 `backend/src/wompi/wompi.service.ts:8-22` envía a Wompi sandbox un payload sin `payment_method`.  
 Wompi requiere un token de tarjeta (generado por su widget JS). Con `USE_WOMPI=true`, el resultado es siempre un error silencioso → transacción queda PENDING indefinidamente.
 
-### P4 — Modelo Delivery ausente
-El schema Prisma no tiene tabla `Delivery`. El requisito de crear una entrega al aprobar el pago no puede cumplirse sin una migración primero.
+### ~~P4 — Modelo Delivery ausente~~ RESUELTO ✓ 2026-05-25
+Migración `20260525014707_add_delivery` aplicada. `Delivery` se crea en `finalize()` al aprobar, dentro del mismo `prisma.$transaction`. Validado con smoke test: stock bajó, delivery retornado en respuesta, doble APPROVED idempotente.
 
-### P5 — Cobertura de tests insuficiente
-- `transactions.service.spec.ts`: 1 test que verifica que `prisma.transaction.create` fue llamado.
-- `wompi.controller.spec.ts`: 1 test que verifica `finalize` fue llamado con argumentos correctos.
-- Sin tests para: stock insuficiente, pago fallido, out-of-stock, productos, DTOs inválidos, casos de error.
+**Observación pendiente:** `GET /transactions/:id` aún no incluye el `delivery` relacionado. Añadir `include: { delivery: true }` en `findOne()` queda pendiente para Fase 2.
+
+### P5 — Cobertura de tests insuficiente (en progreso)
+- `transactions.service.spec.ts`: mejorado de 1 a 7 tests. Cubre: PENDING, producto no existe, stock 0, APPROVED crea Delivery, DECLINED sin Delivery, ERROR sin Delivery, doble finalización.
+- `wompi.controller.spec.ts`: 1 test (sin cambios).
+- **Total backend: 10 tests passing.** Cobertura global aún por debajo del 80% requerido.
+- Pendiente: `products.service.spec.ts`, casos adicionales de `wompi.controller.spec.ts`.
 
 ### P6 — Migraciones en `.gitignore`
 `prisma/migrations/` está excluido del repo raíz. Un clone fresco no puede reproducir el schema sin ejecutar `prisma migrate dev` desde cero, lo que puede divergir del estado de producción.

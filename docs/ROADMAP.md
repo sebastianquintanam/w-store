@@ -1,6 +1,7 @@
 # Roadmap — W-Store
 
 **Fecha de inicio:** 2026-05-24  
+**Última actualización:** 2026-05-25  
 **Estrategia:** Reparar el proyecto existente (ver `docs/DECISIONS.md`).  
 **Orden:** Las fases son secuenciales. No comenzar la siguiente hasta completar los criterios de aceptación de la anterior.
 
@@ -12,11 +13,11 @@
 
 ### Tareas
 
-- [ ] Sacar `prisma/migrations/` del `.gitignore` (o documentar alternativa) para que el schema sea reproducible desde git.
+- [x] Sacar `prisma/migrations/` del `.gitignore` — patrón era no-op; comentado con explicación. ✓ 2026-05-24
 - [ ] Corregir el port en la colección Postman de `:3000` a `:3001`.
-- [ ] Verificar con `git log --all --full-history -- backend/.env` si las credenciales fueron commiteadas alguna vez; si sí, rotar las keys de Wompi sandbox.
-- [ ] Agregar `Delivery` al schema Prisma (`schema.prisma`) con sus relaciones a `Transaction` y `Customer`.
-- [ ] Crear y aplicar la migración de `Delivery`.
+- [ ] Verificar con `git log --all --full-history -- backend/.env` si las credenciales fueron commiteadas; si sí, rotar keys de Wompi sandbox.
+- [x] Agregar `Delivery` al schema Prisma con relaciones a `Transaction` y `Customer`. ✓ 2026-05-24
+- [x] Crear y aplicar migración `20260525014707_add_delivery`. `prisma validate` y `pnpm build` pasaron. ✓ 2026-05-25
 - [ ] Agregar `@nestjs/helmet` al backend para headers de seguridad básicos.
 - [ ] Agregar `@nestjs/throttler` con un límite razonable en `POST /transactions`.
 - [ ] Actualizar `backend/.gitignore` para asegurar que `.env` esté excluido correctamente a nivel de carpeta.
@@ -43,9 +44,10 @@
 - [ ] Los controladores solo deben orquestar: recibir DTO → llamar use-case → retornar respuesta.
 
 **Delivery:**
-- [ ] Implementar `DeliveryRepository` con `create()`.
-- [ ] En `FinalizeTransactionUseCase`, al aprobar: crear registro `Delivery` con `transactionId`, `customerId`, `address`, `status: PENDING_SHIPMENT`.
-- [ ] Exponer `GET /deliveries/:transactionId` para que el frontend pueda consultar la entrega.
+- [ ] Extraer lógica de Delivery a un repositorio o servicio dedicado (actualmente inline en `TransactionsService`).
+- [x] Al aprobar: crear `Delivery` con `transactionId`, `customerId`, `address`, `status: PENDING_SHIPMENT` dentro del `$transaction` atómico. ✓ 2026-05-25 — validado con smoke test manual (stock bajó, delivery creado, doble APPROVED idempotente).
+- [ ] `GET /transactions/:id` no incluye `delivery` relacionado — añadir `include: { delivery: true }` en `findOne()`.
+- [ ] Exponer `GET /deliveries/:transactionId` para consulta directa desde el frontend.
 
 **WompiService:**
 - [ ] Implementar tokenización de tarjeta: `POST /tokens/cards` en Wompi sandbox para obtener token antes de crear transacción.
@@ -55,9 +57,9 @@
 
 **Tests backend (objetivo > 80% cobertura):**
 - [ ] `products.service.spec.ts`: findAll, producto sin stock.
-- [ ] `transactions.service.spec.ts`: crear PENDING, stock insuficiente, producto no encontrado, aprobar → decrementa stock, rechazar → no decrementa, idempotencia (ya finalizada).
-- [ ] `wompi.controller.spec.ts`: webhook APPROVED → finaliza, webhook DECLINED → declina, firma inválida con VERIFY=true → ignorado, referencia sin prefijo `trx_` → ignorado.
-- [ ] `delivery.service.spec.ts` / use-case equivalente: crear delivery al aprobar.
+- [x] `transactions.service.spec.ts`: 7 tests — PENDING, producto no existe, stock 0, APPROVED crea Delivery, DECLINED sin Delivery, ERROR sin Delivery, doble finalización idempotente. ✓ 2026-05-25 — 10 tests passing en total.
+- [ ] `wompi.controller.spec.ts`: webhook APPROVED, DECLINED, firma inválida con VERIFY=true, referencia sin prefijo `trx_`.
+- [ ] Cobertura global > 80% aún pendiente.
 
 ### Criterio de aceptación
 

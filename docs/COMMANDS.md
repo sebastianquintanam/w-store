@@ -221,3 +221,44 @@ curl http://localhost:3001/products
 # Confirmar que Prisma ve la BD
 cd backend && npx prisma migrate status
 ```
+
+---
+
+## Smoke test — flujo de transacción completo
+
+Requiere backend corriendo en `:3001` y BD con seed aplicado.
+
+```bash
+# 1. Obtener el id de un producto del seed
+PRODUCT_ID=$(curl -s http://localhost:3001/products | jq -r '.[0].id')
+
+# 2. Crear transacción (queda en PENDING)
+TRX=$(curl -s -X POST http://localhost:3001/transactions \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"productId\": \"$PRODUCT_ID\",
+    \"deliveryCents\": 5000,
+    \"customer\": {\"fullName\":\"Test User\",\"email\":\"test@test.com\",\"address\":\"Calle 1\"}
+  }")
+echo $TRX | jq .
+TRX_ID=$(echo $TRX | jq -r '.transaction.id')
+
+# 3. Aprobar → debe retornar delivery con status PENDING_SHIPMENT y stock decrementado
+curl -s -X PATCH http://localhost:3001/transactions/$TRX_ID/status \
+  -H "Content-Type: application/json" \
+  -d '{"status":"APPROVED"}' | jq .
+
+# 4. Intentar aprobar de nuevo → debe responder "Ya finalizada" sin tocar stock
+curl -s -X PATCH http://localhost:3001/transactions/$TRX_ID/status \
+  -H "Content-Type: application/json" \
+  -d '{"status":"APPROVED"}' | jq .
+
+# 5. Confirmar stock actualizado
+curl -s http://localhost:3001/products | jq '.[0].stock'
+```
+
+**Resultados esperados validados el 2026-05-25:**
+- Paso 3: `delivery.status = "PENDING_SHIPMENT"` presente en respuesta.
+- Paso 4: `message = "Ya finalizada"`, sin delivery en respuesta.
+- Paso 5: stock = valor inicial − 1.
+```
