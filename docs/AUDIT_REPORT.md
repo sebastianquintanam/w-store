@@ -1,7 +1,7 @@
 # Audit Report — W-Store
 
 **Fecha de auditoría inicial:** 2026-05-24  
-**Última actualización:** 2026-05-25 — `wompi.controller.spec.ts` expandido de 1 a 7 tests. Total: 7 suites, 26 tests passing. Cobertura global pendiente de confirmar contra objetivo >80%.  
+**Última actualización:** 2026-05-25 — `wompi.controller.spec.ts` expandido de 1 a 7 tests. Total: 6 suites, 26 tests passing. Cobertura global pendiente de confirmar contra objetivo >80%.  
 **Auditor:** Claude Sonnet 4.6 (asistido por Sebastian Quintana)  
 **Estado del proyecto:** En reparación activa. Ver `docs/ROADMAP.md` para progreso.
 
@@ -163,7 +163,7 @@ Migración `20260525014707_add_delivery` aplicada. `Delivery` se crea en `finali
 - `products.service.spec.ts`: 3 tests. Cubre: findAll (select + orderBy), findOne (existe), findOne (NotFoundException). ✓ 2026-05-25
 - `wompi.controller.spec.ts`: 7 tests. Cubre: APPROVED, DECLINED, VOIDED→ERROR, referencia sin `trx_`, firma ausente, firma inválida, firma válida (HMAC correcto). ✓ 2026-05-25
 - `products.controller.spec.ts`: 3 tests. `deliveries.controller.spec.ts`: 2 tests.
-- **Total backend: 7 suites, 26 tests passing.** Cobertura global pendiente de confirmar contra objetivo >80%.
+- **Total backend: 6 suites, 26 tests passing.** Cobertura global pendiente de confirmar contra objetivo >80%.
 - Pendiente: `wompi.service.spec.ts` si cobertura no alcanza el 80%.
 
 ### ~~P6 — `.gitignore` de backend incompleto~~ RESUELTO ✓ 2026-05-25

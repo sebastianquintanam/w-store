@@ -58,7 +58,7 @@
 **Tests backend (objetivo > 80% cobertura):**
 - [x] `products.service.spec.ts`: findAll (select + orderBy), findOne (existe), findOne (NotFoundException). ✓ 2026-05-25 — 3 tests. Total acumulado: 6 suites, 20 tests passing.
 - [x] `transactions.service.spec.ts`: 10 tests — create (3), finalize (4), findOne (3). ✓ 2026-05-25 — 17 tests passing en total (products.controller.spec: 3, deliveries.controller.spec: 2).
-- [x] `wompi.controller.spec.ts`: APPROVED, DECLINED, VOIDED→ERROR, referencia sin `trx_`, firma ausente, firma inválida, firma válida. ✓ 2026-05-25 — 7 tests (era 1). Total acumulado: 7 suites, 26 tests passing.
+- [x] `wompi.controller.spec.ts`: APPROVED, DECLINED, VOIDED→ERROR, referencia sin `trx_`, firma ausente, firma inválida, firma válida. ✓ 2026-05-25 — 7 tests (era 1). Total acumulado: 6 suites, 26 tests passing.
 - [ ] `wompi.service.spec.ts`: si cobertura global < 80% tras validar con `pnpm test:cov`.
 - [ ] Cobertura global > 80% aún pendiente de confirmar.
 
