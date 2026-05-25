@@ -1,7 +1,7 @@
 # Roadmap — W-Store
 
 **Fecha de inicio:** 2026-05-24  
-**Última actualización:** 2026-05-25 (6)  
+**Última actualización:** 2026-05-25 (7)  
 **Estrategia:** Reparar el proyecto existente (ver `docs/DECISIONS.md`).  
 **Orden:** Las fases son secuenciales. No comenzar la siguiente hasta completar los criterios de aceptación de la anterior.
 
@@ -56,7 +56,7 @@
 - [x] Agregar `GET /products/:id` — `NotFoundException` si no existe, mismo `select` que `findAll`. 15 tests passing. ✓ 2026-05-25
 
 **Tests backend (objetivo > 80% cobertura):**
-- [ ] `products.service.spec.ts`: findAll, producto sin stock.
+- [x] `products.service.spec.ts`: findAll (select + orderBy), findOne (existe), findOne (NotFoundException). ✓ 2026-05-25 — 3 tests. Total acumulado: 6 suites, 20 tests passing.
 - [x] `transactions.service.spec.ts`: 10 tests — create (3), finalize (4), findOne (3). ✓ 2026-05-25 — 17 tests passing en total (products.controller.spec: 3, deliveries.controller.spec: 2).
 - [ ] `wompi.controller.spec.ts`: webhook APPROVED, DECLINED, firma inválida con VERIFY=true, referencia sin prefijo `trx_`.
 - [ ] Cobertura global > 80% aún pendiente.
