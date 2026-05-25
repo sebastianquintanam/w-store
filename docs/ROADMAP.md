@@ -1,7 +1,7 @@
 # Roadmap — W-Store
 
 **Fecha de inicio:** 2026-05-24  
-**Última actualización:** 2026-05-25 (2)  
+**Última actualización:** 2026-05-25 (3)  
 **Estrategia:** Reparar el proyecto existente (ver `docs/DECISIONS.md`).  
 **Orden:** Las fases son secuenciales. No comenzar la siguiente hasta completar los criterios de aceptación de la anterior.
 
@@ -53,11 +53,11 @@
 - [ ] Implementar tokenización de tarjeta: `POST /tokens/cards` en Wompi sandbox para obtener token antes de crear transacción.
 - [ ] Actualizar el payload de `createTransaction()` para incluir `payment_method: { type: 'CARD', token, installments }`.
 - [ ] Mapear correctamente el status de respuesta de Wompi (`data.status`) al estado interno.
-- [ ] Agregar `GET /products/:id`.
+- [x] Agregar `GET /products/:id` — `NotFoundException` si no existe, mismo `select` que `findAll`. 15 tests passing. ✓ 2026-05-25
 
 **Tests backend (objetivo > 80% cobertura):**
 - [ ] `products.service.spec.ts`: findAll, producto sin stock.
-- [x] `transactions.service.spec.ts`: 10 tests — create (3), finalize (4), findOne (3). ✓ 2026-05-25 — 13 tests passing en total.
+- [x] `transactions.service.spec.ts`: 10 tests — create (3), finalize (4), findOne (3). ✓ 2026-05-25 — 15 tests passing en total (incluye products.controller.spec.ts: 3).
 - [ ] `wompi.controller.spec.ts`: webhook APPROVED, DECLINED, firma inválida con VERIFY=true, referencia sin prefijo `trx_`.
 - [ ] Cobertura global > 80% aún pendiente.
 

@@ -218,6 +218,11 @@ pnpm dev
 # Confirmar que el backend responde
 curl http://localhost:3001/products
 
+# Confirmar GET /products/:id
+PRODUCT_ID=$(curl -s http://localhost:3001/products | jq -r '.[0].id')
+curl -s http://localhost:3001/products/$PRODUCT_ID | jq .
+curl -s http://localhost:3001/products/id_inexistente | jq '{status:.statusCode,message:.message}'
+
 # Confirmar que Prisma ve la BD
 cd backend && npx prisma migrate status
 ```
