@@ -143,7 +143,14 @@ export class TransactionsService {
      * Consulta una transacción por id.
      */
     async findOne(id: string) {
-        const tx = await this.prisma.transaction.findUnique({ where: { id } });
+        const tx = await this.prisma.transaction.findUnique({
+            where: { id },
+            include: {
+                product:  { select: { id: true, name: true, description: true, priceCents: true, stock: true } },
+                customer: { select: { id: true, fullName: true, email: true, address: true } },
+                delivery: true,
+            },
+        });
         if (!tx) throw new NotFoundException('Transaction not found');
         return tx;
     }

@@ -167,4 +167,53 @@ describe('TransactionsService', () => {
             expect((res as any).message).toBe('Ya finalizada');
         });
     });
+
+    // ── findOne() ─────────────────────────────────────────────────────────────
+
+    describe('findOne()', () => {
+        const fullTx = {
+            id: 'trx_1',
+            status: 'APPROVED',
+            productId: 'prod_1',
+            customerId: 'cus_1',
+            amountCents: 96000,
+            baseFeeCents: 1000,
+            deliveryCents: 5000,
+            product:  { id: 'prod_1', name: 'Zapatillas', description: 'Over-ear', priceCents: 90000, stock: 2 },
+            customer: { id: 'cus_1', fullName: 'Sebastián', email: 'sebas@test.com', address: 'Calle 123 #45-67' },
+            delivery: { id: 'del_1', transactionId: 'trx_1', customerId: 'cus_1', address: 'Calle 123 #45-67', status: 'PENDING_SHIPMENT' },
+        };
+
+        it('retorna transacción con product, customer y delivery anidados', async () => {
+            prisma.transaction.findUnique.mockResolvedValueOnce(fullTx as any);
+
+            const res = await svc.findOne('trx_1');
+
+            expect(prisma.transaction.findUnique).toHaveBeenCalledWith(
+                expect.objectContaining({ where: { id: 'trx_1' } }),
+            );
+            expect(res).toHaveProperty('product.name', 'Zapatillas');
+            expect(res).toHaveProperty('customer.email', 'sebas@test.com');
+            expect(res).toHaveProperty('delivery.status', 'PENDING_SHIPMENT');
+        });
+
+        it('retorna delivery null si la transacción no fue aprobada', async () => {
+            prisma.transaction.findUnique.mockResolvedValueOnce({
+                ...fullTx,
+                status: 'DECLINED',
+                delivery: null,
+            } as any);
+
+            const res = await svc.findOne('trx_1');
+
+            expect(res).toHaveProperty('status', 'DECLINED');
+            expect((res as any).delivery).toBeNull();
+        });
+
+        it('lanza NotFoundException si la transacción no existe', async () => {
+            prisma.transaction.findUnique.mockResolvedValueOnce(null);
+
+            await expect(svc.findOne('no_existe')).rejects.toThrow(NotFoundException);
+        });
+    });
 });
