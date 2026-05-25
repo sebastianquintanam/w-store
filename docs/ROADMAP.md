@@ -1,7 +1,7 @@
 # Roadmap — W-Store
 
 **Fecha de inicio:** 2026-05-24  
-**Última actualización:** 2026-05-25 (8)  
+**Última actualización:** 2026-05-25 (10)  
 **Estrategia:** Reparar el proyecto existente (ver `docs/DECISIONS.md`).  
 **Orden:** Las fases son secuenciales. No comenzar la siguiente hasta completar los criterios de aceptación de la anterior.
 
@@ -59,12 +59,16 @@
 - [x] `products.service.spec.ts`: findAll (select + orderBy), findOne (existe), findOne (NotFoundException). ✓ 2026-05-25 — 3 tests. Total acumulado: 6 suites, 20 tests passing.
 - [x] `transactions.service.spec.ts`: 10 tests — create (3), finalize (4), findOne (3). ✓ 2026-05-25 — 17 tests passing en total (products.controller.spec: 3, deliveries.controller.spec: 2).
 - [x] `wompi.controller.spec.ts`: APPROVED, DECLINED, VOIDED→ERROR, referencia sin `trx_`, firma ausente, firma inválida, firma válida. ✓ 2026-05-25 — 7 tests (era 1). Total acumulado: 6 suites, 26 tests passing.
-- [ ] `wompi.service.spec.ts`: si cobertura global < 80% tras validar con `pnpm test:cov`.
-- [ ] Cobertura global > 80% aún pendiente de confirmar.
+- [x] `transactions.controller.spec.ts`: create (1), findOne (2), finalize (1). ✓ 2026-05-25 — 4 tests. Total acumulado: 7 suites, 30 tests passing.
+- [x] Cobertura global > 80% alcanzada en Statements (87.75%), Functions (80%), Lines (88.33%). ✓ 2026-05-25
+- [x] `wompi.service.spec.ts`: createTransaction OK, createTransaction error HTTP. ✓ 2026-05-25 — 2 tests.
+- [x] `deliveries.service.spec.ts`: findByTransactionId (existe + NotFoundException). ✓ 2026-05-25 — 2 tests. Total acumulado: 9 suites, 34 tests passing.
+- [x] Branches >80% alcanzado: 81.44%. ✓ 2026-05-25
+- [x] Cobertura global final: Statements 95.91% | Branches 81.44% | Functions 92% | Lines 97.5%. ✓ 2026-05-25
 
 ### Criterio de aceptación
 
-- `pnpm test:cov` muestra cobertura de líneas y branches > 80% en backend.
+- `pnpm test:cov` muestra cobertura >80% en todas las métricas: Statements 95.91% | Branches 81.44% | Functions 92% | Lines 97.5%. ✓ 2026-05-25 — 9 suites, 34 tests.
 - Con `USE_WOMPI=true` y keys de sandbox válidas, una transacción completa llega a APPROVED vía webhook.
 - `GET /deliveries/:transactionId` retorna la entrega creada.
 - Todos los tests pasan (`pnpm test`).

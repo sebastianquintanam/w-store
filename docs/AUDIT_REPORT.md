@@ -1,7 +1,7 @@
 # Audit Report — W-Store
 
 **Fecha de auditoría inicial:** 2026-05-24  
-**Última actualización:** 2026-05-25 — `wompi.controller.spec.ts` expandido de 1 a 7 tests. Total: 6 suites, 26 tests passing. Cobertura global pendiente de confirmar contra objetivo >80%.  
+**Última actualización:** 2026-05-25 — Cobertura backend completada. 9 suites, 34 tests passing. Statements 95.91% | Branches 81.44% | Functions 92% | Lines 97.5% — objetivo >80% superado en todas las métricas.  
 **Auditor:** Claude Sonnet 4.6 (asistido por Sebastian Quintana)  
 **Estado del proyecto:** En reparación activa. Ver `docs/ROADMAP.md` para progreso.
 
@@ -109,7 +109,7 @@ El usuario nunca ingresa información real. No hay formulario de tarjeta ni de e
 | **Pantalla de resumen** | Debe mostrar producto + base fee + delivery fee + total. No existe. |
 | **Pantalla de resultado final** | Debe mostrar estado y redirigir al producto con stock actualizado. No existe. |
 | **Tests de frontend** | No existe ningún archivo `.spec` en `frontend/src/`. |
-| **Cobertura > 80%** | Backend mejoró a 10 tests passing (7 en `transactions.service`, 1 en `wompi.controller`, 2 anteriores). Cobertura global aún por debajo del 80% requerido. |
+| **Cobertura > 80%** | ALCANZADO ✓ 2026-05-25 — Statements 95.91%, Branches 81.44%, Functions 92%, Lines 97.5%. 9 suites, 34 tests. |
 
 ### Altos (degradan la calidad técnica)
 
@@ -163,8 +163,11 @@ Migración `20260525014707_add_delivery` aplicada. `Delivery` se crea en `finali
 - `products.service.spec.ts`: 3 tests. Cubre: findAll (select + orderBy), findOne (existe), findOne (NotFoundException). ✓ 2026-05-25
 - `wompi.controller.spec.ts`: 7 tests. Cubre: APPROVED, DECLINED, VOIDED→ERROR, referencia sin `trx_`, firma ausente, firma inválida, firma válida (HMAC correcto). ✓ 2026-05-25
 - `products.controller.spec.ts`: 3 tests. `deliveries.controller.spec.ts`: 2 tests.
-- **Total backend: 6 suites, 26 tests passing.** Cobertura global pendiente de confirmar contra objetivo >80%.
-- Pendiente: `wompi.service.spec.ts` si cobertura no alcanza el 80%.
+- `transactions.controller.spec.ts`: 4 tests. Cubre: create, findOne (existe + NotFoundException), finalize. ✓ 2026-05-25
+- `wompi.service.spec.ts`: 2 tests. Cubre: createTransaction OK, createTransaction error HTTP. ✓ 2026-05-25
+- `deliveries.service.spec.ts`: 2 tests. Cubre: findByTransactionId (existe + NotFoundException). ✓ 2026-05-25
+- **Total backend: 9 suites, 34 tests passing.**
+- **Cobertura final:** Statements 95.91% ✓ | Branches 81.44% ✓ | Functions 92% ✓ | Lines 97.5% ✓ — objetivo >80% superado en todas las métricas.
 
 ### ~~P6 — `.gitignore` de backend incompleto~~ RESUELTO ✓ 2026-05-25
 `backend/.gitignore` reforzado: agregadas líneas `.env.*` y `!.env.example`. Cubre variantes `.env.local`, `.env.staging`, `.env.production`. Historial git auditado — ningún archivo `.env` real fue commiteado en ningún momento.
