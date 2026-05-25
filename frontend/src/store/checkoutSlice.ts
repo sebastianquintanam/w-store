@@ -49,10 +49,14 @@ export const checkoutSlice = createSlice({
     resetCheckout() {
       return initialState;
     },
+    resetPayment(state) {
+      state.cardMeta = null;
+      state.transaction = null;
+    },
   },
 });
 
-export const { setProduct, setCardMeta, setCustomer, setTransaction, resetCheckout } =
+export const { setProduct, setCardMeta, setCustomer, setTransaction, resetCheckout, resetPayment } =
   checkoutSlice.actions;
 
 export default checkoutSlice.reducer;

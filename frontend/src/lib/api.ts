@@ -67,3 +67,19 @@ export async function finalizeTransaction(id: string, status: Tx['status']): Pro
     }
     return r.json();
 }
+
+export type Delivery = {
+    id: string;
+    transactionId: string;
+    customerId: string;
+    address: string;
+    status: string;
+    createdAt?: string;
+    updatedAt?: string;
+};
+
+export async function getDeliveryByTransactionId(transactionId: string): Promise<Delivery> {
+    const r = await fetch(`${API}/deliveries/${transactionId}`);
+    if (!r.ok) throw new Error('No se pudo cargar el estado de entrega');
+    return r.json();
+}
