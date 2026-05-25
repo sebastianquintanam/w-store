@@ -1,0 +1,175 @@
+{
+  "info": {
+    "_postman_id": "354a9f1e-0f6c-4b50-9adc-1ca702526a73",
+    "name": "W-Store Backend",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "23068844"
+  },
+  "item": [
+    {
+      "name": "transactionsId",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"productId\": \"cmhc7fkdd00017mmmhm523n5l\",\n  \"deliveryCents\": 5000,\n  \"customer\": {\n    \"fullName\": \"Sebastián Quintana\",\n    \"email\": \"sebas@test.com\",\n    \"address\": \"Calle 123 #45-67\"\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3001/transactions",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3001",
+          "path": [
+            "transactions"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "transactionWebhook",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"event\": \"transaction.updated\",\n  \"data\": {\n    \"transaction\": {\n      \"status\": \"APPROVED\",\n      \"reference\": \"trx_cmhdshqvh00027muj658zta3x\"\n    }\n  }\n}\n",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3001/wompi/webhook",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3001",
+          "path": [
+            "wompi",
+            "webhook"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "transactionGetId",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3001/transactions/cmhld8dlz00057m8ddakqxwew",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3001",
+          "path": [
+            "transactions",
+            "cmhld8dlz00057m8ddakqxwew"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "transactionPending",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"event\": \"transaction.updated\",\n  \"data\": {\n    \"transaction\": {\n      \"status\": \"DECLINED\",\n      \"reference\": \"trx_cmhdshqvh00027muj658zta3x\"\n    }\n  }\n}\n",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3001/wompi/webhook",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3001",
+          "path": [
+            "wompi",
+            "webhook"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "transactionsApproved",
+      "request": {
+        "method": "PATCH",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"status\": \"APPROVED\" }",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3001/transactions/cmhld8dlz00057m8ddakqxwew/status",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3001",
+          "path": [
+            "transactions",
+            "cmhld8dlz00057m8ddakqxwew",
+            "status"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "transactionApproved",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"event\": \"transaction.updated\",\n  \"data\": {\n    \"transaction\": {\n      \"status\": \"APPROVED\",\n      \"reference\": \"trx_cmhdshqvh00027muj658zta3x\"\n    }\n  }\n}\n",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3001/wompi/webhook",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3001",
+          "path": [
+            "wompi",
+            "webhook"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

@@ -4,8 +4,11 @@ dist/
 coverage/
 
 # === Env files ===
+docs/private/
 .env
-.env.*.local
+.env.*
+!.env.example
+
 
 # === Prisma ===
 prisma/dev.db
