@@ -1,7 +1,7 @@
 # Audit Report — W-Store
 
 **Fecha de auditoría inicial:** 2026-05-24  
-**Última actualización:** 2026-05-25 — Fase 2 parcial: Delivery, GET /transactions/:id con relaciones y GET /products/:id implementados y validados.  
+**Última actualización:** 2026-05-25 — Fase 2 parcial: endpoints de backend completos, Helmet y rate limiting implementados y validados.  
 **Auditor:** Claude Sonnet 4.6 (asistido por Sebastian Quintana)  
 **Estado del proyecto:** En reparación activa. Ver `docs/ROADMAP.md` para progreso.
 
@@ -34,11 +34,11 @@
 | `POST` | `/transactions` | Crea transacción PENDING, llama Wompi si `USE_WOMPI=true` | `src/transactions/transactions.controller.ts` |
 | `GET` | `/transactions/:id` | Consulta transacción por ID — incluye `product`, `customer` y `delivery` (null si no aprobada) | `src/transactions/transactions.controller.ts` |
 | `PATCH` | `/transactions/:id/status` | Finaliza transacción manualmente (simulado) | `src/transactions/transactions.controller.ts` |
+| `GET` | `/deliveries/:transactionId` | Retorna la entrega asociada a una transacción — 404 si no existe | `src/deliveries/deliveries.controller.ts` |
 | `POST` | `/wompi/webhook` | Webhook de Wompi, finaliza transacción y descuenta stock | `src/wompi/wompi.controller.ts` |
 
 **Endpoints exigidos por spec que NO existen:**
 - `GET /customers` o `POST /customers`
-- `GET /deliveries/:transactionId` — la creación de Delivery ya ocurre internamente al aprobar
 
 ---
 
@@ -92,6 +92,7 @@ El usuario nunca ingresa información real. No hay formulario de tarjeta ni de e
 | Guard de idempotencia: doble APPROVED → "Ya finalizada" sin nuevo decremento ni Delivery | `transactions.service.ts:102-104` |
 | `GET /transactions/:id` devuelve `product`, `customer` y `delivery` anidados (`delivery: null` si no aprobada) | `transactions.service.ts:145-156` |
 | `GET /products/:id` — retorna producto individual con mismo `select` que `findAll`; 404 si no existe | `products.service.ts:15-22`, `products.controller.ts:13-16` |
+| `GET /deliveries/:transactionId` — consulta entrega por `transactionId`; 404 si no existe | `src/deliveries/` (DeliveriesModule completo) |
 
 ---
 
@@ -177,8 +178,8 @@ No documenta la arquitectura del proyecto, endpoints, modelo de datos ni instruc
 |---|---|---|
 | Archivos `.env` en disco con posibles secretos | ALTO | `backend/.env` y `frontend/.env` existen. Verificar con `git log --all --full-history -- backend/.env` si fueron commiteados. |
 | Webhook sin autenticación en modo por defecto | ALTO | `VERIFY_WOMPI_SIGNATURE=false` por defecto. Cualquiera puede llamar `/wompi/webhook` y finalizar transacciones. |
-| Sin headers de seguridad | MEDIO | Sin Helmet, sin CSP, sin `X-Frame-Options`, sin `Strict-Transport-Security`. |
-| Sin rate limiting | MEDIO | `POST /transactions` puede ser abusado para crear registros masivos en BD. |
+| ~~Sin headers de seguridad~~ | ~~MEDIO~~ | RESUELTO ✓ 2026-05-25 — `helmet@8.2.0` en `main.ts`. Activa `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, CSP y más. |
+| ~~Sin rate limiting~~ | ~~MEDIO~~ | RESUELTO ✓ 2026-05-25 — `@nestjs/throttler@6.5.0` global: 60 req/IP/min, retorna `429` con headers `X-RateLimit-*`. |
 | CORS hardcodeado a `localhost:5173` | MEDIO | No funciona en staging ni producción sin cambio de código. |
 | IDs internos de transacciones expuestos en UI | BAJO | `ProductCard.tsx:113` muestra el ID de la transacción en pantalla. |
 | Sin validación de rango en `deliveryCents` | BAJO | Acepta 0 o valores arbitrariamente grandes; no hay regla de negocio sobre el rango válido. |

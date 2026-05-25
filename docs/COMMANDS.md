@@ -215,6 +215,12 @@ pnpm dev
 ## Verificación rápida
 
 ```bash
+# Confirmar headers de seguridad (Helmet)
+curl -sI http://localhost:3001/products | grep -i -e x-content-type -e x-frame -e referrer-policy -e content-security
+
+# Verificar rate limit (X-RateLimit headers)
+curl -sI http://localhost:3001/products | grep -i x-ratelimit
+
 # Confirmar que el backend responde
 curl http://localhost:3001/products
 
@@ -222,6 +228,10 @@ curl http://localhost:3001/products
 PRODUCT_ID=$(curl -s http://localhost:3001/products | jq -r '.[0].id')
 curl -s http://localhost:3001/products/$PRODUCT_ID | jq .
 curl -s http://localhost:3001/products/id_inexistente | jq '{status:.statusCode,message:.message}'
+
+# Confirmar GET /deliveries/:transactionId (requiere una transacción APPROVED previa)
+curl -s http://localhost:3001/deliveries/$TRX_ID | jq .
+curl -s http://localhost:3001/deliveries/id_inexistente | jq '{status:.statusCode,message:.message}'
 
 # Confirmar que Prisma ve la BD
 cd backend && npx prisma migrate status

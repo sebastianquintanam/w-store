@@ -1,7 +1,7 @@
 # Roadmap — W-Store
 
 **Fecha de inicio:** 2026-05-24  
-**Última actualización:** 2026-05-25 (3)  
+**Última actualización:** 2026-05-25 (5)  
 **Estrategia:** Reparar el proyecto existente (ver `docs/DECISIONS.md`).  
 **Orden:** Las fases son secuenciales. No comenzar la siguiente hasta completar los criterios de aceptación de la anterior.
 
@@ -18,8 +18,8 @@
 - [ ] Verificar con `git log --all --full-history -- backend/.env` si las credenciales fueron commiteadas; si sí, rotar keys de Wompi sandbox.
 - [x] Agregar `Delivery` al schema Prisma con relaciones a `Transaction` y `Customer`. ✓ 2026-05-24
 - [x] Crear y aplicar migración `20260525014707_add_delivery`. `prisma validate` y `pnpm build` pasaron. ✓ 2026-05-25
-- [ ] Agregar `@nestjs/helmet` al backend para headers de seguridad básicos.
-- [ ] Agregar `@nestjs/throttler` con un límite razonable en `POST /transactions`.
+- [x] Agregar `helmet@8.2.0` — `app.use(helmet())` en `main.ts` después de `enableCors()`. Headers: `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, CSP. ✓ 2026-05-25
+- [x] Agregar `@nestjs/throttler@6.5.0` — `ThrottlerModule.forRoot([{ ttl: 60_000, limit: 60 }])` + `APP_GUARD` global. Responde `429` al exceder 60 req/min. ✓ 2026-05-25
 - [ ] Actualizar `backend/.gitignore` para asegurar que `.env` esté excluido correctamente a nivel de carpeta.
 
 ### Criterio de aceptación
@@ -47,7 +47,7 @@
 - [ ] Extraer lógica de Delivery a un repositorio o servicio dedicado (actualmente inline en `TransactionsService`).
 - [x] Al aprobar: crear `Delivery` con `transactionId`, `customerId`, `address`, `status: PENDING_SHIPMENT` dentro del `$transaction` atómico. ✓ 2026-05-25 — validado con smoke test manual (stock bajó, delivery creado, doble APPROVED idempotente).
 - [x] `GET /transactions/:id` ahora incluye `product` (select), `customer` (select) y `delivery` (completo, null si no aprobada). 13 tests passing. ✓ 2026-05-25
-- [ ] Exponer `GET /deliveries/:transactionId` para consulta directa desde el frontend.
+- [x] Exponer `GET /deliveries/:transactionId` — `DeliveriesModule` completo (service, controller, spec). 17 tests passing. ✓ 2026-05-25
 
 **WompiService:**
 - [ ] Implementar tokenización de tarjeta: `POST /tokens/cards` en Wompi sandbox para obtener token antes de crear transacción.
@@ -57,7 +57,7 @@
 
 **Tests backend (objetivo > 80% cobertura):**
 - [ ] `products.service.spec.ts`: findAll, producto sin stock.
-- [x] `transactions.service.spec.ts`: 10 tests — create (3), finalize (4), findOne (3). ✓ 2026-05-25 — 15 tests passing en total (incluye products.controller.spec.ts: 3).
+- [x] `transactions.service.spec.ts`: 10 tests — create (3), finalize (4), findOne (3). ✓ 2026-05-25 — 17 tests passing en total (products.controller.spec: 3, deliveries.controller.spec: 2).
 - [ ] `wompi.controller.spec.ts`: webhook APPROVED, DECLINED, firma inválida con VERIFY=true, referencia sin prefijo `trx_`.
 - [ ] Cobertura global > 80% aún pendiente.
 
