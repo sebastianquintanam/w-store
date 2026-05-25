@@ -3,6 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { json, urlencoded } from 'express';
+import helmet from 'helmet';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -30,6 +31,9 @@ async function bootstrap() {
     allowedHeaders: 'Content-Type,Authorization,Integrity-Signature',
     credentials: false, // cámbialo a true si vas a usar cookies
   });
+
+  // Security headers (después de CORS para no sobreescribir sus headers)
+  app.use(helmet());
   
   app.useGlobalPipes(
     new ValidationPipe({
