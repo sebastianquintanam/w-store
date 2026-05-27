@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, cleanup, waitFor } from '@testing-library/react';
+import { render, screen, cleanup, waitFor, act, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Provider } from 'react-redux';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
@@ -300,6 +300,118 @@ describe('CheckoutProcessingPage', () => {
       });
       await user.click(screen.getByRole('button', { name: /volver al resumen/i }));
       expect(mockNavigate).toHaveBeenCalledWith('/checkout/summary');
+    });
+  });
+
+  // ── polling — with fake timers ─────────────────────────────────────────────────
+  //
+  // vi.useFakeTimers() is scoped to this describe block only.
+  //
+  // Sequence per test:
+  //  1. renderPage() — Effect 1 fires, createTransaction called (mock resolves)
+  //  2. await act(async () => {})
+  //       • The 'await' yields to the microtask queue, letting the
+  //         createTransaction .then() callback run (setTxId, setPhase)
+  //       • act() then flushes React re-renders + Effect 2 setup
+  //         (setInterval / setTimeout now registered in fake-timer queue)
+  //  3. await act(async () => { await vi.advanceTimersByTimeAsync(ms) })
+  //       • Fires interval / timeout callbacks (including async getTransaction)
+  //       • act() flushes any resulting React state updates
+
+  describe('polling — with fake timers', () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+      // createTransaction always resolves with a PENDING tx
+      mockCreateTx.mockResolvedValue({ message: 'ok', transaction: mockTxPending });
+      // getTransaction returns PENDING by default (polling keeps running)
+      mockGetTx.mockResolvedValue(mockTxPending);
+    });
+
+    afterEach(() => {
+      vi.clearAllTimers();
+      vi.useRealTimers();
+    });
+
+    /**
+     * Renders the page and flushes the createTransaction promise + subsequent
+     * React re-renders so Effect 2's setInterval/setTimeout are registered in
+     * the fake-timer queue before any timer advancement.
+     */
+    async function renderAndFlush(store = makeStore()) {
+      const result = renderPage(store);
+      await act(async () => {});
+      return result;
+    }
+
+    // ── APPROVED ───────────────────────────────────────────────────────────────
+
+    it('calls getTransaction with tx id, stores APPROVED in Redux, navigates to /checkout/result', async () => {
+      const mockTxApproved: Tx = { ...mockTxPending, status: 'APPROVED' };
+      mockGetTx.mockResolvedValue(mockTxApproved);
+
+      const { store } = await renderAndFlush();
+      await act(async () => { await vi.advanceTimersByTimeAsync(2_500); });
+
+      expect(mockGetTx).toHaveBeenCalledWith(mockTxPending.id);
+      expect(store.getState().checkout.transaction).toMatchObject({ status: 'APPROVED' });
+      expect(mockNavigate).toHaveBeenCalledWith('/checkout/result');
+    });
+
+    // ── DECLINED ───────────────────────────────────────────────────────────────
+
+    it('stores DECLINED in Redux and navigates to /checkout/result', async () => {
+      const mockTxDeclined: Tx = { ...mockTxPending, status: 'DECLINED' };
+      mockGetTx.mockResolvedValue(mockTxDeclined);
+
+      const { store } = await renderAndFlush();
+      await act(async () => { await vi.advanceTimersByTimeAsync(2_500); });
+
+      expect(store.getState().checkout.transaction).toMatchObject({ status: 'DECLINED' });
+      expect(mockNavigate).toHaveBeenCalledWith('/checkout/result');
+    });
+
+    // ── ERROR ──────────────────────────────────────────────────────────────────
+
+    it('stores ERROR in Redux and navigates to /checkout/result', async () => {
+      const mockTxError: Tx = { ...mockTxPending, status: 'ERROR' };
+      mockGetTx.mockResolvedValue(mockTxError);
+
+      const { store } = await renderAndFlush();
+      await act(async () => { await vi.advanceTimersByTimeAsync(2_500); });
+
+      expect(store.getState().checkout.transaction).toMatchObject({ status: 'ERROR' });
+      expect(mockNavigate).toHaveBeenCalledWith('/checkout/result');
+    });
+
+    // ── PENDING — no navigation ────────────────────────────────────────────────
+
+    it('does not navigate when poll returns PENDING and keeps showing "Procesando pago..."', async () => {
+      // Default: getTransaction returns PENDING — component stays in polling phase
+      await renderAndFlush();
+      await act(async () => { await vi.advanceTimersByTimeAsync(2_500); });
+
+      expect(mockNavigate).not.toHaveBeenCalled();
+      expect(screen.getByText('Procesando pago...')).toBeInTheDocument();
+    });
+
+    // ── Timeout ────────────────────────────────────────────────────────────────
+
+    it('shows "La operación tardó demasiado." and "← Volver al inicio" after 120 seconds', async () => {
+      await renderAndFlush();
+      await act(async () => { await vi.advanceTimersByTimeAsync(120_000); });
+
+      expect(screen.getByText('La operación tardó demasiado.')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /volver al inicio/i })).toBeInTheDocument();
+    });
+
+    it('"← Volver al inicio" navigates to / from timeout phase', async () => {
+      // userEvent hangs under fake timers even with advanceTimers option;
+      // fireEvent.click is synchronous and has no timer dependency.
+      await renderAndFlush();
+      await act(async () => { await vi.advanceTimersByTimeAsync(120_000); });
+
+      fireEvent.click(screen.getByRole('button', { name: /volver al inicio/i }));
+      expect(mockNavigate).toHaveBeenCalledWith('/');
     });
   });
 });
