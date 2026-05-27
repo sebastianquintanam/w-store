@@ -78,17 +78,17 @@ cd backend
 pnpm install
 
 # Modo desarrollo con hot-reload
-pnpm start:dev
+pnpm run start:dev
 
 # Modo producción
-pnpm build
-pnpm start:prod
+pnpm run build
+pnpm run start:prod
 
 # Formatear código
-pnpm format
+pnpm run format
 
 # Lint
-pnpm lint
+pnpm run lint
 ```
 
 ---
@@ -99,22 +99,22 @@ Todos los comandos se ejecutan desde `backend/`.
 
 ```bash
 # Aplicar migraciones y regenerar cliente (dev)
-npx prisma migrate dev
+pnpm exec prisma migrate dev
 
 # Aplicar migraciones en producción (sin prompt)
-npx prisma migrate deploy
+pnpm exec prisma migrate deploy
 
 # Sembrar la base de datos (3 productos de ejemplo)
 pnpm run prisma:seed
 
 # Abrir Prisma Studio (explorador visual de BD)
-npx prisma studio
+pnpm exec prisma studio
 
 # Regenerar el cliente Prisma sin migrar
-npx prisma generate
+pnpm exec prisma generate
 
 # Revisar diferencias entre schema y BD
-npx prisma migrate status
+pnpm exec prisma migrate status
 ```
 
 ---
@@ -166,25 +166,30 @@ El reporte de cobertura se genera en `backend/coverage/`.
 
 ### Frontend
 
-> Los tests de frontend aún no están implementados (ver Fase 4 en `ROADMAP.md`).
-> Cuando estén configurados con Vitest:
-
 ```bash
 cd frontend
 
-# Correr tests (cuando estén implementados)
-pnpm test
+# Correr todos los tests (150 tests, ~2 s, sin watch)
+pnpm run test:run
 
-# Con cobertura
-pnpm test --coverage
+# Con reporte de cobertura (genera coverage/)
+pnpm run test:coverage
+
+# Verificación de tipos TypeScript (sin emitir archivos)
+pnpm exec tsc --noEmit
+
+# Build de producción (tsc + vite build)
+pnpm run build
 ```
+
+> `pnpm run test` (sin `:run`) arranca Vitest en modo watch — útil durante desarrollo, no para CI.
 
 ---
 
 ## Flujo completo de arranque local (desde cero)
 
 ```bash
-# 1. Base de datos
+# 1. Base de datos (docker-compose.yml está en backend/)
 cd backend
 docker compose up -d
 
@@ -193,20 +198,21 @@ pnpm install
 
 # 3. Variables de entorno
 cp .env.example .env
-# → editar .env con DATABASE_URL y keys de Wompi
+# → editar .env: DATABASE_URL="postgresql://wuser:wpass@localhost:5432/wstore?schema=public"
 
 # 4. Migraciones y seed
-npx prisma migrate dev
+pnpm exec prisma migrate dev
 pnpm run prisma:seed
 
 # 5. Levantar backend
-pnpm start:dev
+pnpm run start:dev
 # → http://localhost:3001
 
 # 6. En otra terminal: frontend
 cd ../frontend
+cp .env.example .env
 pnpm install
-pnpm dev
+pnpm run dev
 # → http://localhost:5173
 ```
 
@@ -234,7 +240,7 @@ curl -s http://localhost:3001/deliveries/$TRX_ID | jq .
 curl -s http://localhost:3001/deliveries/id_inexistente | jq '{status:.statusCode,message:.message}'
 
 # Confirmar que Prisma ve la BD
-cd backend && npx prisma migrate status
+cd backend && pnpm exec prisma migrate status
 ```
 
 ---

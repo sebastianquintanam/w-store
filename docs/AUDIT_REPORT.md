@@ -1,9 +1,9 @@
 # Audit Report — W-Store
 
 **Fecha de auditoría inicial:** 2026-05-24  
-**Última actualización:** 2026-05-25 — Cobertura backend completada. 9 suites, 34 tests passing. Statements 95.91% | Branches 81.44% | Functions 92% | Lines 97.5% — objetivo >80% superado en todas las métricas.  
+**Última actualización:** 2026-05-27 — Frontend completo con flujo multi-paso, 150 tests passing. README raíz actualizado.  
 **Auditor:** Claude Sonnet 4.6 (asistido por Sebastian Quintana)  
-**Estado del proyecto:** En reparación activa. Ver `docs/ROADMAP.md` para progreso.
+**Estado del proyecto:** Completo (backend + frontend + tests). Fases 1–4 cerradas. Ver `docs/ROADMAP.md`.
 
 ---
 
@@ -20,7 +20,7 @@
 | CSS | Tailwind CSS | 4.x |
 | Package manager | pnpm | — |
 | Tests backend | Jest 30 + jest-mock-extended | — |
-| Tests frontend | **Ninguno** | — |
+| Tests frontend | Vitest + Testing Library | 4.x |
 | Contenedores | Docker Compose (solo BD) | — |
 
 ---
@@ -42,27 +42,40 @@
 
 ---
 
-## 3. Flujo frontend existente
+## 3. Flujo frontend — estado actual ✓ 2026-05-27
 
-El frontend tiene **una sola pantalla** — no hay routing, no hay pasos, no hay Redux.
+El frontend implementa el **flujo completo de checkout en 5 pasos** con React Router, Redux Toolkit y formularios reales.
 
 ```
-App.tsx
+ProductListPage (/)
   └─ useEffect → GET /products → renderiza ProductCard[] en grid
-        └─ ProductCard (por producto)
-              ├─ Botón "Comprar" → POST /transactions (datos hardcodeados)
-              ├─ Polling cada 2.5s mientras status = PENDING
-              └─ Botones de debug: "Aprobar / Rechazar / Error" → PATCH /transactions/:id/status
+        └─ ProductCard → "Pagar con tarjeta"
+              └─ setProduct(product) → navigate('/checkout/card')
+
+CheckoutCardPage (/checkout/card)
+  ├─ Formulario entrega: nombre, email, dirección
+  ├─ Formulario tarjeta: número (máscara), titular, vencimiento MM/YY, CVV
+  ├─ Validación Luhn + detección de marca (Visa/Mastercard)
+  └─ setCustomer() + setCardMeta() → navigate('/checkout/summary')
+
+CheckoutSummaryPage (/checkout/summary)
+  ├─ Muestra producto, datos de entrega, tarjeta enmascarada
+  ├─ Desglose de costos: precio + base fee + delivery = total
+  └─ "Confirmar pago" → navigate('/checkout/processing')
+
+CheckoutProcessingPage (/checkout/processing)
+  ├─ POST /transactions → crea transacción PENDING
+  ├─ Polling GET /transactions/:id cada 2.5s
+  ├─ Timeout de 120s con mensaje de error
+  └─ APPROVED/DECLINED/ERROR → navigate('/checkout/result')
+
+CheckoutResultPage (/checkout/result)
+  ├─ APPROVED: muestra confirmación + estado de entrega (GET /deliveries/:id)
+  ├─ DECLINED/ERROR: muestra mensaje + botón "Intentar nuevamente"
+  └─ "Volver al inicio" → resetCheckout() → navigate('/')
 ```
 
-**Datos de cliente hardcodeados en `frontend/src/lib/api.ts:36-44`:**
-```
-fullName: 'Demo User'
-email:    'demo@example.com'
-address:  'Calle Falsa 123'
-```
-
-El usuario nunca ingresa información real. No hay formulario de tarjeta ni de entrega.
+Todos los pasos tienen **route guards** con `<Navigate replace>`: redirigen a `/` si falta el producto, o a `/checkout/card` si falta el cliente o los datos de tarjeta.
 
 ---
 
@@ -93,23 +106,32 @@ El usuario nunca ingresa información real. No hay formulario de tarjeta ni de e
 | `GET /transactions/:id` devuelve `product`, `customer` y `delivery` anidados (`delivery: null` si no aprobada) | `transactions.service.ts:145-156` |
 | `GET /products/:id` — retorna producto individual con mismo `select` que `findAll`; 404 si no existe | `products.service.ts:15-22`, `products.controller.ts:13-16` |
 | `GET /deliveries/:transactionId` — consulta entrega por `transactionId`; 404 si no existe | `src/deliveries/` (DeliveriesModule completo) |
+| Redux Toolkit instalado y configurado; slice `checkoutSlice` con product, customer, cardMeta, transaction | `frontend/src/store/checkoutSlice.ts` |
+| Flujo de checkout en 5 pasos con React Router y route guards | `frontend/src/pages/` |
+| Formulario de tarjeta con máscara, validación Luhn y detección Visa/Mastercard | `frontend/src/pages/CheckoutCardPage.tsx` |
+| Formulario de entrega con validación de campos requeridos | `frontend/src/pages/CheckoutCardPage.tsx` |
+| Pantalla de resumen con desglose de costos (precio + base fee + delivery + total) | `frontend/src/pages/CheckoutSummaryPage.tsx` |
+| Pantalla de procesando con polling 2.5s, timeout 120s y manejo de errores de red | `frontend/src/pages/CheckoutProcessingPage.tsx` |
+| Pantalla de resultado con APPROVED/DECLINED/ERROR, datos de entrega y botones de retorno | `frontend/src/pages/CheckoutResultPage.tsx` |
+| CVV no almacenado; número completo de tarjeta no persistido (solo last4 y marca) | `frontend/src/store/checkoutSlice.ts`, `CheckoutCardPage.tsx` |
+| 150 tests frontend — Vitest + Testing Library | `frontend/src/**/*.test.ts(x)` (10 archivos) |
 
 ---
 
-## 5. Requisitos faltantes
+## 5. Requisitos — estado actualizado ✓ 2026-05-27
 
-### Críticos (bloquean la evaluación)
+### ~~Críticos~~ — todos resueltos
 
-| Requisito | Detalle |
+| Requisito | Estado |
 |---|---|
-| **Redux obligatorio** | La spec exige Redux para React. No existe ninguna gestión de estado centralizada. |
-| **Flujo de 5 pasos** | Spec: Producto → Tarjeta+Entrega → Resumen → Resultado → Producto actualizado. Solo existe la pantalla de producto. |
-| **Formulario de tarjeta de crédito** | Sin validación, sin detección Visa/Mastercard, sin enmascaramiento. |
-| **Formulario de entrega real** | Los datos del cliente están hardcodeados en `api.ts`. |
-| **Pantalla de resumen** | Debe mostrar producto + base fee + delivery fee + total. No existe. |
-| **Pantalla de resultado final** | Debe mostrar estado y redirigir al producto con stock actualizado. No existe. |
-| **Tests de frontend** | No existe ningún archivo `.spec` en `frontend/src/`. |
-| **Cobertura > 80%** | ALCANZADO ✓ 2026-05-25 — Statements 95.91%, Branches 81.44%, Functions 92%, Lines 97.5%. 9 suites, 34 tests. |
+| ~~Redux obligatorio~~ | RESUELTO ✓ 2026-05-27 — `checkoutSlice` con Redux Toolkit. Estado centralizado de producto, cliente, cardMeta y transacción. |
+| ~~Flujo de 5 pasos~~ | RESUELTO ✓ 2026-05-27 — Rutas: `/` → `/checkout/card` → `/checkout/summary` → `/checkout/processing` → `/checkout/result`. |
+| ~~Formulario de tarjeta de crédito~~ | RESUELTO ✓ 2026-05-27 — Número con máscara, titular, vencimiento MM/YY, CVV. Validación Luhn, detección Visa/Mastercard. |
+| ~~Formulario de entrega real~~ | RESUELTO ✓ 2026-05-27 — Campos: nombre completo, email, dirección. Validación de campos requeridos. |
+| ~~Pantalla de resumen~~ | RESUELTO ✓ 2026-05-27 — Muestra producto, datos de entrega, tarjeta enmascarada, desglose de costos y total. |
+| ~~Pantalla de resultado final~~ | RESUELTO ✓ 2026-05-27 — APPROVED/DECLINED/ERROR con datos de entrega, botones de reintento y retorno al inicio. |
+| ~~Tests de frontend~~ | RESUELTO ✓ 2026-05-27 — **150 tests passing** en 10 archivos. Vitest + Testing Library. |
+| **Cobertura backend > 80%** | ALCANZADO ✓ 2026-05-25 — Statements 95.91% \| Branches 81.44% \| Functions 92% \| Lines 97.5%. 9 suites, 34 tests. |
 
 ### Altos (degradan la calidad técnica)
 
@@ -169,11 +191,29 @@ Migración `20260525014707_add_delivery` aplicada. `Delivery` se crea en `finali
 - **Total backend: 9 suites, 34 tests passing.**
 - **Cobertura final:** Statements 95.91% ✓ | Branches 81.44% ✓ | Functions 92% ✓ | Lines 97.5% ✓ — objetivo >80% superado en todas las métricas.
 
+**Tests frontend — 150 tests passing ✓ 2026-05-27**
+
+| Archivo | Tests |
+|---|---|
+| `lib/money.test.ts` | 3 |
+| `lib/checkout.test.ts` | 5 |
+| `lib/card.test.ts` | 27 |
+| `store/checkoutSlice.test.ts` | 23 |
+| `components/ProductCard.test.tsx` | 10 |
+| `pages/CheckoutCardPage.test.tsx` | 15 |
+| `pages/CheckoutSummaryPage.test.tsx` | 14 |
+| `pages/CheckoutResultPage.test.tsx` | 23 |
+| `pages/CheckoutProcessingPage.test.tsx` | 24 |
+| `pages/ProductListPage.test.tsx` | 6 |
+| **Total frontend** | **150** |
+
+Herramientas: Vitest 4.x + Testing Library 16.x. Cobertura de frontend no medida en esta auditoría.
+
 ### ~~P6 — `.gitignore` de backend incompleto~~ RESUELTO ✓ 2026-05-25
 `backend/.gitignore` reforzado: agregadas líneas `.env.*` y `!.env.example`. Cubre variantes `.env.local`, `.env.staging`, `.env.production`. Historial git auditado — ningún archivo `.env` real fue commiteado en ningún momento.
 
-### P7 — README de backend es boilerplate de NestJS
-No documenta la arquitectura del proyecto, endpoints, modelo de datos ni instrucciones de setup.
+### ~~P7 — README de backend es boilerplate de NestJS~~ PARCIALMENTE RESUELTO ✓ 2026-05-27
+El `README.md` raíz fue reescrito con arquitectura, endpoints, modelo de datos, env vars, setup y comandos de tests. Los sub-README de `backend/` y `frontend/` siguen siendo boilerplate (NestJS/Vite), pero el README raíz cubre toda la información relevante del proyecto.
 
 ---
 

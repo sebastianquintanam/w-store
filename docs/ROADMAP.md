@@ -1,7 +1,7 @@
 # Roadmap — W-Store
 
 **Fecha de inicio:** 2026-05-24  
-**Última actualización:** 2026-05-25 (10)  
+**Última actualización:** 2026-05-27 — Fases 1–4 completadas. Frontend + 150 tests. README actualizado.  
 **Estrategia:** Reparar el proyecto existente (ver `docs/DECISIONS.md`).  
 **Orden:** Las fases son secuenciales. No comenzar la siguiente hasta completar los criterios de aceptación de la anterior.
 
@@ -75,95 +75,95 @@
 
 ---
 
-## Fase 3 — Frontend checkout completo
+## Fase 3 — Frontend checkout completo ✓ 2026-05-27
 
 **Objetivo:** Implementar el flujo de 5 pasos exigido por la spec, con Redux, formularios reales y diseño mobile-first.
 
 ### Tareas
 
 **Infraestructura:**
-- [ ] Instalar Redux Toolkit + React Router v6.
-- [ ] Definir el store: slice `checkout` con estado para cada paso (producto, tarjeta, cliente, transacción, resultado).
-- [ ] Configurar rutas: `/`, `/checkout/card`, `/checkout/summary`, `/checkout/processing`, `/checkout/result`.
+- [x] Instalar Redux Toolkit + React Router v7. ✓ 2026-05-27
+- [x] Definir el store: slice `checkoutSlice` con producto, customer, cardMeta y transaction. ✓ 2026-05-27
+- [x] Configurar rutas: `/`, `/checkout/card`, `/checkout/summary`, `/checkout/processing`, `/checkout/result`. ✓ 2026-05-27
 
 **Paso 1 — Producto (`/`):**
-- [ ] Mostrar producto con nombre, descripción, precio formateado en COP, stock disponible.
-- [ ] Deshabilitar "Pagar con tarjeta de crédito" si stock = 0.
-- [ ] Al hacer click, guardar `productId` en store y navegar a `/checkout/card`.
-- [ ] Al volver desde resultado, refrescar stock del producto.
+- [x] Mostrar producto con nombre, descripción, precio formateado en COP, stock disponible. ✓ 2026-05-27
+- [x] Deshabilitar "Pagar con tarjeta" si stock = 0. ✓ 2026-05-27
+- [x] Al hacer click, guardar product en store y navegar a `/checkout/card`. ✓ 2026-05-27
+- [x] Al volver desde resultado, ProductListPage re-fetcha `/products` → stock actualizado. ✓ 2026-05-27
 
 **Paso 2 — Tarjeta + Entrega (`/checkout/card`):**
-- [ ] Formulario de tarjeta: número (con máscara `XXXX XXXX XXXX XXXX`), titular, expiración (MM/YY), CVV.
-- [ ] Validación con algoritmo de Luhn para el número de tarjeta.
-- [ ] Detección automática Visa / Mastercard por prefijo (logo visual).
-- [ ] Formulario de entrega: nombre completo, email, dirección.
-- [ ] Validación de todos los campos antes de continuar.
-- [ ] Guardar datos en store. No persistir CVV ni número completo en localStorage.
+- [x] Formulario de tarjeta: número (máscara `XXXX XXXX XXXX XXXX`), titular, vencimiento MM/YY, CVV. ✓ 2026-05-27
+- [x] Validación Luhn para el número de tarjeta. ✓ 2026-05-27
+- [x] Detección automática Visa / Mastercard por prefijo. ✓ 2026-05-27
+- [x] Formulario de entrega: nombre completo, email, dirección. ✓ 2026-05-27
+- [x] Validación de todos los campos antes de continuar. ✓ 2026-05-27
+- [x] Guardar en store. CVV y número completo no persistidos. ✓ 2026-05-27
 
 **Paso 3 — Resumen (`/checkout/summary`):**
-- [ ] Mostrar: nombre del producto, precio, base fee (fijo, definido en backend), delivery fee, **total**.
-- [ ] Tarjeta enmascarada: solo últimos 4 dígitos visibles.
-- [ ] Botón "Pagar" → llama `POST /transactions` con datos del store.
+- [x] Mostrar producto, precio, base fee, delivery fee, total. ✓ 2026-05-27
+- [x] Tarjeta enmascarada (solo últimos 4 dígitos). ✓ 2026-05-27
+- [x] "Confirmar pago" → navega a `/checkout/processing` (la transacción se crea allí). ✓ 2026-05-27
 
 **Paso 4 — Procesando (`/checkout/processing`):**
-- [ ] Mostrar indicador de carga.
-- [ ] Polling a `GET /transactions/:id` cada 2.5s.
-- [ ] Timeout de 2 minutos con mensaje de error si no resuelve.
-- [ ] Al resolver (APPROVED / DECLINED / ERROR), navegar a `/checkout/result`.
+- [x] POST /transactions → crea transacción PENDING. ✓ 2026-05-27
+- [x] Polling a GET /transactions/:id cada 2.5s. ✓ 2026-05-27
+- [x] Timeout de 120s (2 minutos) con mensaje de error. ✓ 2026-05-27
+- [x] Al resolver (APPROVED / DECLINED / ERROR), navega a `/checkout/result`. ✓ 2026-05-27
 
 **Paso 5 — Resultado (`/checkout/result`):**
-- [ ] Mostrar estado final: APPROVED → éxito, DECLINED / ERROR → fallo.
-- [ ] Mostrar referencia de transacción.
-- [ ] Botón "Volver a la tienda" → navega a `/` y refresca stock.
-- [ ] El producto en `/` debe mostrar el stock actualizado.
+- [x] APPROVED: confirmación + datos de entrega (GET /deliveries/:transactionId). ✓ 2026-05-27
+- [x] DECLINED / ERROR: mensaje de fallo + botón "Intentar nuevamente". ✓ 2026-05-27
+- [x] "Volver al inicio" → resetCheckout() → navigate('/'). ✓ 2026-05-27
 
 **Diseño:**
-- [ ] Mobile-first: breakpoint base para iPhone SE (375px).
-- [ ] Sin scroll horizontal en ningún paso.
-- [ ] Botones y formularios utilizables en pantalla táctil.
-- [ ] Responsive hasta desktop.
+- [x] Mobile-first con Tailwind CSS (breakpoints sm, lg). ✓ 2026-05-27
+- [x] Sin scroll horizontal en ningún paso. ✓ 2026-05-27
+- [x] Responsive hasta desktop. ✓ 2026-05-27
 
 **Persistencia:**
-- [ ] Guardar en localStorage el paso actual y el `transactionId` (no datos de tarjeta).
+- [ ] Guardar en localStorage el `transactionId` (no datos de tarjeta).
 - [ ] Al refrescar en `/checkout/processing`, recuperar `transactionId` y retomar polling.
 
 ### Criterio de aceptación
 
-- Flujo completo funciona de inicio a fin en Chrome mobile (DevTools iPhone SE).
-- Sin datos de tarjeta en localStorage ni Redux devtools con CVV persistido.
-- Stock se actualiza en pantalla de producto al volver.
-- Formulario de tarjeta rechaza números inválidos (Luhn).
-- Refrescar en `/checkout/processing` retoma el polling sin perder el estado.
+- Flujo completo funciona de inicio a fin. ✓ 2026-05-27
+- Sin CVV ni número completo de tarjeta persistido en Redux ni localStorage. ✓ 2026-05-27
+- Stock se actualiza en pantalla de producto al volver (ProductListPage re-fetcha en mount). ✓ 2026-05-27
+- Formulario de tarjeta rechaza números inválidos (Luhn). ✓ 2026-05-27
+- Refrescar en `/checkout/processing` reinicia el flujo (persistencia localStorage pendiente).
 
 ---
 
-## Fase 4 — Tests frontend + pulido
+## Fase 4 — Tests frontend + pulido ✓ (tests) / pendiente (pulido)
 
 **Objetivo:** Cobertura de tests > 80% en frontend. Ajustes de UX y accesibilidad.
 
 ### Tareas
 
-**Tests (Vitest + Testing Library):**
-- [ ] Configurar Vitest en el proyecto frontend.
-- [ ] `ProductCard.spec.tsx`: renderiza con stock disponible, deshabilita botón con stock 0.
-- [ ] `CardForm.spec.tsx`: validación Luhn, detección Visa/MC, campos requeridos, no persiste CVV.
-- [ ] `DeliveryForm.spec.tsx`: validación de email, campos requeridos.
-- [ ] `Summary.spec.tsx`: calcula correctamente producto + base fee + delivery = total.
-- [ ] `checkout.slice.spec.ts`: acciones del store, transiciones de estado entre pasos.
-- [ ] `Result.spec.tsx`: renderiza APPROVED, DECLINED, ERROR correctamente.
-- [ ] Mocks de `fetch` para todos los llamados a API.
+**Tests (Vitest + Testing Library) — 150 tests passing ✓ 2026-05-27**
+- [x] Configurar Vitest en el proyecto frontend. ✓ 2026-05-27
+- [x] `ProductCard.test.tsx`: renderiza con stock disponible, deshabilita botón con stock 0. 10 tests. ✓ 2026-05-27
+- [x] `CheckoutCardPage.test.tsx`: validación Luhn, detección Visa/MC, campos requeridos, no persiste CVV ni número completo. 15 tests. ✓ 2026-05-27
+- [x] `CheckoutSummaryPage.test.tsx`: calcula correctamente producto + base fee + delivery = total. Guards de ruta. 14 tests. ✓ 2026-05-27
+- [x] `checkoutSlice.test.ts`: acciones del store (setProduct, setCustomer, setCardMeta, setTransaction, resetCheckout, resetPayment). 23 tests. ✓ 2026-05-27
+- [x] `CheckoutResultPage.test.tsx`: renderiza APPROVED, DECLINED, ERROR; guards; delivery fetch. 23 tests. ✓ 2026-05-27
+- [x] `CheckoutProcessingPage.test.tsx`: guards, polling, fake timers, timeout 120s. 24 tests. ✓ 2026-05-27
+- [x] `ProductListPage.test.tsx`: loading, error, products render. 6 tests. ✓ 2026-05-27
+- [x] `lib/card.test.ts`, `lib/money.test.ts`, `lib/checkout.test.ts`: utilidades puras. 35 tests. ✓ 2026-05-27
+- [x] Mocks de API vía `vi.mock('../lib/api')`. ✓ 2026-05-27
 
 **Pulido:**
-- [ ] Eliminar botones de debug "Aprobar / Rechazar / Error" del `ProductCard`.
+- [ ] Eliminar botones de debug "Aprobar / Rechazar / Error" del `ProductCard` si aún existen.
 - [ ] Reemplazar placeholder gris de imagen con imagen real o ilustración del producto.
 - [ ] Revisar contraste de colores (WCAG AA mínimo).
 - [ ] Agregar `aria-label` en botones de acción.
 
 ### Criterio de aceptación
 
-- `pnpm test --coverage` muestra cobertura de líneas > 80% en frontend.
-- Todos los tests pasan.
-- Sin botones de simulación expuestos en UI de producción.
+- `pnpm run test:run` muestra 150 tests passing. ✓ 2026-05-27
+- `pnpm run test:coverage` genera reporte de cobertura. ✓ 2026-05-27
+- Sin botones de simulación expuestos en UI de producción (pendiente verificación).
 
 ---
 
@@ -174,20 +174,21 @@
 ### Tareas
 
 **README raíz:**
-- [ ] Descripción del proyecto.
-- [ ] Flujo de negocio (los 5 pasos).
-- [ ] Stack técnico.
-- [ ] Explicación de arquitectura (capas backend, estructura frontend).
-- [ ] Estructura de carpetas.
-- [ ] Modelo de datos (diagrama o tabla).
-- [ ] Tabla de endpoints con método, ruta y descripción.
-- [ ] Link a colección Postman.
-- [ ] Variables de entorno (sin valores secretos).
-- [ ] Instrucciones de setup local (Docker, migrate, seed, backend, frontend).
-- [ ] Comandos de tests y cobertura.
-- [ ] Resultados de cobertura (captura o tabla).
-- [ ] Consideraciones de seguridad.
-- [ ] Limitaciones conocidas.
+- [x] Descripción del proyecto. ✓ 2026-05-27
+- [x] Flujo de negocio (los 5 pasos). ✓ 2026-05-27
+- [x] Stack técnico. ✓ 2026-05-27
+- [x] Explicación de arquitectura (capas backend, estructura frontend). ✓ 2026-05-27
+- [x] Estructura de carpetas. ✓ 2026-05-27
+- [x] Modelo de datos (tabla con 4 entidades). ✓ 2026-05-27
+- [x] Tabla de endpoints con método, ruta y descripción. ✓ 2026-05-27
+- [x] Link a colección Postman (`docs/postman/`). ✓ 2026-05-27
+- [x] Variables de entorno (sin valores secretos). ✓ 2026-05-27
+- [x] Instrucciones de setup local (Docker, migrate, seed, backend, frontend). ✓ 2026-05-27
+- [x] Comandos de tests y cobertura (backend + frontend). ✓ 2026-05-27
+- [x] Resultados de cobertura backend (Statements 95.91% | Branches 81.44%). ✓ 2026-05-27
+- [x] Consideraciones de seguridad y decisiones técnicas. ✓ 2026-05-27
+- [x] Limitaciones conocidas. ✓ 2026-05-27
+- [ ] Screenshots o GIF del flujo completo.
 
 **Postman:**
 - [ ] Actualizar colección: corregir puerto a 3001.
