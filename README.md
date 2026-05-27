@@ -23,6 +23,30 @@ Home (/)
 
 ---
 
+## 📸 Demo del flujo
+
+Capturas del flujo principal de compra: selección de producto, formulario de checkout, resumen, procesamiento y resultado.
+
+### Flujo principal
+
+| Home / Productos | Checkout / Tarjeta y entrega |
+|---|---|
+| ![Home / Productos](docs/screenshots/01-home-products.png) | ![Checkout / Tarjeta y entrega](docs/screenshots/02-checkout-card.png) |
+
+| Resumen de compra | Procesando pago |
+|---|---|
+| ![Resumen de compra](docs/screenshots/03-checkout-summary.png) | ![Procesando pago](docs/screenshots/04-processing.png) |
+
+| Pago aprobado | Pago rechazado |
+|---|---|
+| ![Pago aprobado](docs/screenshots/05-result-approved.png) | ![Pago rechazado](docs/screenshots/06-result-declined.png) |
+
+### Manejo de timeout
+
+![Timeout de procesamiento](docs/screenshots/07-processing-timeout.png)
+
+---
+
 ## 🏗️ Tech stack
 
 | Capa | Tecnología | Versión |
