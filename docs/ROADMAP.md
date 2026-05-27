@@ -188,7 +188,7 @@
 - [x] Resultados de cobertura backend (Statements 95.91% | Branches 81.44%). ✓ 2026-05-27
 - [x] Consideraciones de seguridad y decisiones técnicas. ✓ 2026-05-27
 - [x] Limitaciones conocidas. ✓ 2026-05-27
-- [ ] Screenshots o GIF del flujo completo.
+- [x] Screenshots del flujo completo en README. ✓ 2026-05-27 — 7 capturas en `docs/screenshots/`, sección `## 📸 Demo del flujo` añadida al README raíz.
 
 **Postman:**
 - [ ] Actualizar colección: corregir puerto a 3001.
