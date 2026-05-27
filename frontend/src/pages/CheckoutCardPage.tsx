@@ -3,55 +3,14 @@ import { useNavigate, Navigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../store';
 import { setCustomer, setCardMeta } from '../store/checkoutSlice';
 import type { Product } from '../lib/api';
-
-// ─── pure helpers ─────────────────────────────────────────────────────────────
-
-function onlyDigits(s: string) {
-  return s.replace(/\D/g, '');
-}
-
-function formatCardNumber(s: string) {
-  return onlyDigits(s)
-    .slice(0, 16)
-    .replace(/(.{4})/g, '$1 ')
-    .trim();
-}
-
-function detectBrand(digits: string): 'visa' | 'mastercard' | 'unknown' {
-  if (!digits) return 'unknown';
-  if (digits[0] === '4') return 'visa';
-  const first2 = parseInt(digits.slice(0, 2), 10);
-  if (first2 >= 51 && first2 <= 55) return 'mastercard';
-  if (digits.length >= 4) {
-    const first4 = parseInt(digits.slice(0, 4), 10);
-    if (first4 >= 2221 && first4 <= 2720) return 'mastercard';
-  }
-  return 'unknown';
-}
-
-function isValidLuhn(digits: string): boolean {
-  let sum = 0;
-  let alt = false;
-  for (let i = digits.length - 1; i >= 0; i--) {
-    let n = parseInt(digits[i], 10);
-    if (alt) {
-      n *= 2;
-      if (n > 9) n -= 9;
-    }
-    sum += n;
-    alt = !alt;
-  }
-  return sum % 10 === 0;
-}
-
-function isValidExpiry(s: string): boolean {
-  const match = s.match(/^(0[1-9]|1[0-2])\/(\d{2})$/);
-  if (!match) return false;
-  const month = parseInt(match[1], 10);
-  const year = 2000 + parseInt(match[2], 10);
-  const now = new Date();
-  return new Date(year, month - 1, 1) >= new Date(now.getFullYear(), now.getMonth(), 1);
-}
+import { formatCOP } from '../lib/money';
+import {
+  onlyDigits,
+  formatCardNumber,
+  detectBrand,
+  isValidLuhn,
+  isValidExpiry,
+} from '../lib/card';
 
 // ─── form types ───────────────────────────────────────────────────────────────
 
@@ -393,18 +352,12 @@ function Field({
 }
 
 function ProductSummary({ product }: { product: Product }) {
-  const price = new Intl.NumberFormat('es-CO', {
-    style: 'currency',
-    currency: 'COP',
-    maximumFractionDigits: 0,
-  }).format(product.priceCents);
-
   return (
     <div className="space-y-2">
       <div className="aspect-video rounded-xl bg-gray-100" />
       <p className="font-semibold text-sm">{product.name}</p>
       <p className="text-sm text-gray-500">{product.description}</p>
-      <p className="text-sm font-medium">{price}</p>
+      <p className="text-sm font-medium">{formatCOP(product.priceCents)}</p>
       <p className="text-xs text-gray-400">{product.stock} disponibles</p>
     </div>
   );

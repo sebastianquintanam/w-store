@@ -1,26 +1,9 @@
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useAppSelector } from '../store';
-
-// ─── constants ────────────────────────────────────────────────────────────────
-
-const BASE_FEE_CENTS = 1_000;
-const DELIVERY_CENTS = 5_000;
-
-// ─── helpers ──────────────────────────────────────────────────────────────────
-
-function formatCOP(value: number) {
-  return new Intl.NumberFormat('es-CO', {
-    style: 'currency',
-    currency: 'COP',
-    maximumFractionDigits: 0,
-  }).format(value);
-}
-
-const BRAND_DISPLAY: Record<'visa' | 'mastercard' | 'unknown', string> = {
-  visa: 'Visa',
-  mastercard: 'Mastercard',
-  unknown: 'Desconocida',
-};
+import { formatCOP } from '../lib/money';
+import { BASE_FEE_CENTS, DELIVERY_CENTS, calcTotal } from '../lib/checkout';
+import { maskCard, BRAND_DISPLAY } from '../lib/card';
+import InfoRow from '../components/InfoRow';
 
 // ─── page component ───────────────────────────────────────────────────────────
 
@@ -31,7 +14,7 @@ export default function CheckoutSummaryPage() {
   if (!product) return <Navigate to="/" replace />;
   if (!customer || !cardMeta) return <Navigate to="/checkout/card" replace />;
 
-  const total = product.priceCents + BASE_FEE_CENTS + DELIVERY_CENTS;
+  const total = calcTotal(product.priceCents);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -72,9 +55,9 @@ export default function CheckoutSummaryPage() {
             <section>
               <h2 className="text-base font-semibold mb-3">Entrega</h2>
               <div className="rounded-2xl border bg-white p-5 shadow-sm space-y-2">
-                <Row label="Nombre" value={customer.fullName} />
-                <Row label="Email" value={customer.email} />
-                <Row label="Dirección" value={customer.address} />
+                <InfoRow label="Nombre" value={customer.fullName} />
+                <InfoRow label="Email" value={customer.email} />
+                <InfoRow label="Dirección" value={customer.address} />
               </div>
             </section>
 
@@ -82,10 +65,10 @@ export default function CheckoutSummaryPage() {
             <section>
               <h2 className="text-base font-semibold mb-3">Tarjeta</h2>
               <div className="rounded-2xl border bg-white p-5 shadow-sm space-y-2">
-                <Row label="Marca" value={BRAND_DISPLAY[cardMeta.brand]} />
-                <Row label="Número" value={`**** **** **** ${cardMeta.last4}`} mono />
-                <Row label="Titular" value={cardMeta.holderName} />
-                <Row label="Vencimiento" value={cardMeta.expiry} mono />
+                <InfoRow label="Marca" value={BRAND_DISPLAY[cardMeta.brand]} />
+                <InfoRow label="Número" value={maskCard(cardMeta.last4)} mono />
+                <InfoRow label="Titular" value={cardMeta.holderName} />
+                <InfoRow label="Vencimiento" value={cardMeta.expiry} mono />
               </div>
             </section>
 
@@ -124,25 +107,6 @@ export default function CheckoutSummaryPage() {
 }
 
 // ─── sub-components ───────────────────────────────────────────────────────────
-
-function Row({
-  label,
-  value,
-  mono = false,
-}: {
-  label: string;
-  value: string;
-  mono?: boolean;
-}) {
-  return (
-    <div className="flex items-baseline justify-between gap-4">
-      <span className="text-sm text-gray-500 shrink-0">{label}</span>
-      <span className={`text-sm text-gray-900 text-right truncate ${mono ? 'font-mono' : ''}`}>
-        {value}
-      </span>
-    </div>
-  );
-}
 
 function CostBreakdown({
   priceCents,

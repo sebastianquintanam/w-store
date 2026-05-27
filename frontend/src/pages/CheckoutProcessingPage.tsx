@@ -3,23 +3,13 @@ import { useNavigate, Navigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../store';
 import { setTransaction } from '../store/checkoutSlice';
 import { createTransaction, getTransaction } from '../lib/api';
+import { formatCOP } from '../lib/money';
+import { DELIVERY_CENTS, calcTotal } from '../lib/checkout';
 
 // ─── constants ────────────────────────────────────────────────────────────────
 
-const BASE_FEE_CENTS = 1_000;
-const DELIVERY_CENTS = 5_000;
 const POLL_INTERVAL_MS = 2_500;
 const POLL_TIMEOUT_MS = 120_000;
-
-// ─── helpers ──────────────────────────────────────────────────────────────────
-
-function formatCOP(value: number) {
-  return new Intl.NumberFormat('es-CO', {
-    style: 'currency',
-    currency: 'COP',
-    maximumFractionDigits: 0,
-  }).format(value);
-}
 
 // ─── types ────────────────────────────────────────────────────────────────────
 
@@ -118,7 +108,7 @@ export default function CheckoutProcessingPage() {
   if (!product) return <Navigate to="/" replace />;
   if (!customer || !cardMeta) return <Navigate to="/checkout/card" replace />;
 
-  const total = product.priceCents + BASE_FEE_CENTS + DELIVERY_CENTS;
+  const total = calcTotal(product.priceCents);
   const isSpinning = phase === 'creating' || phase === 'polling';
 
   function handleRetry() {

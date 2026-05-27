@@ -2,14 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAppDispatch } from '../store';
 import { setProduct } from '../store/checkoutSlice';
 import type { Product } from '../lib/api';
-
-function formatCOP(value: number) {
-  return new Intl.NumberFormat('es-CO', {
-    style: 'currency',
-    currency: 'COP',
-    maximumFractionDigits: 0,
-  }).format(value);
-}
+import { formatCOP } from '../lib/money';
 
 export default function ProductCard({ product }: { product: Product }) {
   const dispatch = useAppDispatch();

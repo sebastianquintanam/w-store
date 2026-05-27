@@ -3,16 +3,10 @@ import { useNavigate, Navigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../store';
 import { resetCheckout, resetPayment } from '../store/checkoutSlice';
 import { getDeliveryByTransactionId, type Delivery } from '../lib/api';
-
-// ─── helpers ──────────────────────────────────────────────────────────────────
-
-function formatCOP(value: number) {
-  return new Intl.NumberFormat('es-CO', {
-    style: 'currency',
-    currency: 'COP',
-    maximumFractionDigits: 0,
-  }).format(value);
-}
+import { formatCOP } from '../lib/money';
+import { calcTotal } from '../lib/checkout';
+import { maskCard, BRAND_DISPLAY } from '../lib/card';
+import InfoRow from '../components/InfoRow';
 
 // ─── result config ────────────────────────────────────────────────────────────
 
@@ -57,12 +51,6 @@ const STATUS_ICON: Record<ResultKey, string> = {
   DECLINED: '✕',
   ERROR: '!',
   OTHER: '?',
-};
-
-const BRAND_DISPLAY: Record<'visa' | 'mastercard' | 'unknown', string> = {
-  visa: 'Visa',
-  mastercard: 'Mastercard',
-  unknown: 'Desconocida',
 };
 
 // ─── page component ───────────────────────────────────────────────────────────
@@ -110,7 +98,7 @@ export default function CheckoutResultPage() {
     : 'OTHER';
 
   const cfg = RESULT[statusKey];
-  const total = transaction.amountCents ?? (product.priceCents + 1_000 + 5_000);
+  const total = transaction.amountCents ?? calcTotal(product.priceCents);
   const isRetryable = statusKey === 'DECLINED' || statusKey === 'ERROR';
 
   function handleGoHome() {
@@ -162,7 +150,7 @@ export default function CheckoutResultPage() {
           <div className="space-y-1.5 border-t pt-3">
             <p className="text-xs font-medium uppercase tracking-wide text-gray-400 mb-2">Tarjeta</p>
             <InfoRow label="Marca" value={BRAND_DISPLAY[cardMeta.brand]} />
-            <InfoRow label="Número" value={`**** **** **** ${cardMeta.last4}`} mono />
+            <InfoRow label="Número" value={maskCard(cardMeta.last4)} mono />
             <InfoRow label="Titular" value={cardMeta.holderName} />
           </div>
         </div>
@@ -229,15 +217,3 @@ export default function CheckoutResultPage() {
   );
 }
 
-// ─── sub-component ────────────────────────────────────────────────────────────
-
-function InfoRow({ label, value, mono = false }: { label: string; value: string; mono?: boolean }) {
-  return (
-    <div className="flex items-baseline justify-between gap-4">
-      <span className="text-sm text-gray-500 shrink-0">{label}</span>
-      <span className={`text-sm text-gray-900 text-right truncate ${mono ? 'font-mono' : ''}`}>
-        {value}
-      </span>
-    </div>
-  );
-}
