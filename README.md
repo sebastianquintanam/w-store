@@ -1,4 +1,4 @@
-# 🛍️ W-Store — Checkout con Wompi Sandbox (NestJS + React)
+# 🛍️ W-Store — Full-Stack Checkout Demo
 
 ![Status](https://img.shields.io/badge/status-complete-brightgreen?style=flat-square)
 ![Backend](https://img.shields.io/badge/backend-NestJS%20%2B%20Prisma-red?style=flat-square)
